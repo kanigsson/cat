@@ -2,6 +2,6 @@
 
 #ifndef CONST_H
 #define CONST_H
-extern unsigned int ADA_O_RDONLY;
-extern unsigned int ADA_O_RDWR;
+extern int ADA_O_RDONLY;
+extern int ADA_O_RDWR;
 #endif

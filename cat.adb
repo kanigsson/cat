@@ -2,17 +2,34 @@ with Ada.Command_Line;
 with Ada.Text_IO;
 with Interfaces.C; use Interfaces.C;
 with Const_H;
+with System;
 
 procedure Cat with SPARK_Mode is
 
    function C_Open (File : char_array; Flags : int) return int;
    pragma Import (C, C_Open, "open");
 
+   subtype size_t is unsigned;
+
+   subtype ssize_t is int;
+   subtype off_t is int;
+
+   function C_Read (Fd : int; Buf : System.Address; Size : size_t; Offset : off_t)
+                    return ssize_t;
+   pragma Import (C, C_Read, "read");
+
+   procedure Read (Fd : int; Buf : in out String; Has_Read : out ssize_t) is
+   begin
+      Has_Read := C_Read (Fd, Buf'Address, Buf'Length, 0);
+   end Read;
+
+   X : int;
+   Buf : String (1 .. 1024);
+   Has_Read : ssize_t;
 begin
    for I in 1 .. Ada.Command_Line.Argument_Count loop
-      Ada.Text_IO.Put_Line (Ada.Command_Line.Argument (I));
+      X := C_Open (To_C (Ada.Command_Line.Argument (I)), const_h.ADA_O_RDONLY);
+      Read (X, Buf, Has_Read);
+      Ada.Text_IO.Put_Line (Buf (Integer(1) .. Integer(Has_Read)));
    end loop;
-
-   ADa.Text_IO.Put_Line (unsigned'Image (Const_H.Ada_O_RDONLY));
-   ADa.Text_IO.Put_Line (unsigned'Image (Const_H.Ada_O_RDWR));
 end Cat;
