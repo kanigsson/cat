@@ -1,0 +1,5 @@
+project Cat is
+
+  for Languages use ("Ada", "C");
+  for Main use ("cat.adb");
+end Cat;
