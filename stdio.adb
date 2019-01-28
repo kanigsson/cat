@@ -1,6 +1,6 @@
 with System;
 
-package body Stdio is
+package body Stdio with SPARK_Mode => Off is
 
    function C_Open (File : char_array; Flags : int) return int;
    pragma Import (C, C_Open, "open");
@@ -26,12 +26,12 @@ package body Stdio is
       return C_Close (Fd);
    end Close;
 
-   procedure Read (Fd : int; Buf : in out String; Has_Read : out ssize_t) is
+   procedure Read (Fd : int; Buf : out Init_String; Has_Read : out ssize_t) is
    begin
       Has_Read := C_Read (Fd, Buf'Address, Buf'Length, 0);
    end Read;
 
-   procedure Write (Fd : int; Buf : in out String; Num_Bytes : Size_T; Has_Written : out ssize_t) is
+   procedure Write (Fd : int; Buf : in Init_String; Num_Bytes : Size_T; Has_Written : out ssize_t) is
    begin
       Has_Written := C_Write (Fd, Buf'Address, Num_Bytes);
    end Write;

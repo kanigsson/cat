@@ -7,7 +7,7 @@ procedure Cat with SPARK_Mode is
 
    X : int;
    Err : int;
-   Buf : String (1 .. 1024);
+   Buf : Init_String (1 .. 1024);
    Has_Read, Has_Written : ssize_t;
 begin
    for I in 1 .. Ada.Command_Line.Argument_Count loop
