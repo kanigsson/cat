@@ -1,8 +1,9 @@
-cat.exe: cat.adb const_h.ads const.c
+cat.exe: cat.adb errors.ads
 	gprbuild -p -P cat
 
-const_h.ads: const.h
-	gcc -fdump-ada-spec const.h
+errors.ads: errors.ads_templ
+	cpp -P $^ | tail -n +3 > $@
+	
 
 .PHONY: proof
 

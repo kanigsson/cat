@@ -1,7 +1,9 @@
 with Const_H;
 with Interfaces.C; use Interfaces.C;
 
-package Stdio with SPARK_Mode is
+package Stdio with SPARK_Mode,
+ Abstract_State => (FD_Table)
+is
 
    subtype ssize_t is int;
    subtype off_t is int;
