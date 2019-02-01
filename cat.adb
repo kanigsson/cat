@@ -2,6 +2,7 @@ with Ada.Command_Line;
 with Ada.Text_IO;
 with Interfaces.C; use Interfaces.C;
 with Stdio; use Stdio;
+with Errors;
 
 procedure Cat with SPARK_Mode is
 
@@ -12,6 +13,15 @@ procedure Cat with SPARK_Mode is
 begin
    for I in 1 .. Ada.Command_Line.Argument_Count loop
       X := Open (To_C (Ada.Command_Line.Argument (I)), ADA_O_RDONLY);
+      if X = -1 then
+         case Errors.Get_Errno is
+            when Errors.ADA_ENOENT =>
+               Ada.Text_IO.Put_Line ("file does not exist");
+            when others =>
+               Ada.Text_IO.Put_Line ("unknown errors");
+         end case;
+         return;
+      end if;
       pragma Assert (X >= 0);
       loop
          Read (X, Buf, Has_Read);

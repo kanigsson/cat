@@ -11,7 +11,8 @@ package Stdio with SPARK_Mode is
 
    type Init_String is array (Positive range <>) of Init_Char;
 
-   function Open (File : char_array; Flags : int) return Int;
+   function Open (File : char_array; Flags : int) return Int
+     with Post => (Open'Result = -1 or else Open'Result >= 0);
    function Close (Fd : int) return Int;
 
    procedure Read (Fd : int; Buf : out Init_String; Has_Read : out ssize_t)
