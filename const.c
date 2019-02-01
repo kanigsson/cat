@@ -1,5 +1,7 @@
-#include "const.h"
-#include "errno.h"
+#include <fcntl.h>
 
-const int ADA_O_RDONLY = O_RDONLY;
-const int ADA_O_RDWR = O_RDWR;
+#ifndef CONST_H
+#define CONST_H
+extern const int ADA_O_RDONLY;
+extern const int ADA_O_RDWR;
+#endif
