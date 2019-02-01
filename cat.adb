@@ -12,7 +12,7 @@ procedure Cat with SPARK_Mode is
    Has_Read, Has_Written : ssize_t;
 begin
    for I in 1 .. Ada.Command_Line.Argument_Count loop
-      X := Open (To_C (Ada.Command_Line.Argument (I)), ADA_O_RDONLY);
+      Open (To_C (Ada.Command_Line.Argument (I)), ADA_O_RDONLY, X);
       if X = -1 then
          case Errors.Get_Errno is
             when Errors.ADA_ENOENT =>
@@ -29,6 +29,6 @@ begin
 	 Write (Stdout, Buf, Size_T (Has_Read), Has_Written);
 	 pragma Assert (Has_Read = Has_Written);
       end loop;
-      Err := Close(X);
+      Close(X, Err);
    end loop;
 end Cat;

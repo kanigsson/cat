@@ -13,12 +13,33 @@ is
 
    type Init_String is array (Positive range <>) of Init_Char;
 
-   function Open (File : char_array; Flags : int) return Int
-     with Post => (Open'Result = -1 or else Open'Result >= 0);
-   function Close (Fd : int) return Int;
+
+   function Valid_Fd (Fd : Int) return Boolean
+   with Ghost,
+        Global => (FD_Table);
+   --  return True Fd has an entry in the FD table
+
+   function FD_Flags (Fd : Int) return Int
+   with Ghost,
+   Pre => Valid_Fd (Fd);
+   --  return the flags which which the FD was opened
+
+   procedure Open (File : char_array; Flags : int; Fd : out Int)
+     with Global => (In_Out => FD_Table),
+          Post =>
+     ((if Fd >= 0 then
+         Valid_Fd (Fd) and then
+         FD_Flags (Fd) = Flags
+       else Fd = -1));
+
+   procedure Close (Fd : int; Result : out Int)
+   with Global => (In_Out => FD_Table),
+        Pre    => Valid_Fd (Fd);
 
    procedure Read (Fd : int; Buf : out Init_String; Has_Read : out ssize_t)
-     with Post =>
+     with Pre =>
+     (Valid_Fd (Fd)),
+          Post =>
      (Has_Read <= Buf'Length and then
 	(if Has_Read > 0 then Buf (Buf'First .. Buf'First + Positive (Has_Read) - 1)'Valid_scalars));
 

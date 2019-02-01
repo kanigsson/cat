@@ -16,14 +16,18 @@ package body Stdio with SPARK_Mode => Off is
                     return ssize_t;
    pragma Import (C, C_Write, "write");
 
-   function Open (File : char_array; Flags : int) return Int is
+   function Valid_Fd (Fd : Int) return Boolean is
    begin
-      return C_Open (File, Flags);
+   end Valid_Fd;
+
+   procedure Open (File : char_array; Flags : int; Fd : out Int) is
+   begin
+      Fd := C_Open (File, Flags);
    end Open;
 
-   function Close (Fd : int) return Int is
+   procedure Close (Fd : int; Result : out Int) is
    begin
-      return C_Close (Fd);
+      Result := C_Close (Fd);
    end Close;
 
    procedure Read (Fd : int; Buf : out Init_String; Has_Read : out ssize_t) is
