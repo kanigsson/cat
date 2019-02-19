@@ -18,7 +18,19 @@ package body Stdio with SPARK_Mode => Off is
 
    function Valid_Fd (Fd : Int) return Boolean is
    begin
+      -- ??? This function modifies Errors.Errors_State, but we cannot mention
+      -- this because this function is supposed to be used in specs/contracts.
+      return Const_H.fcntl(fd, Const_H.ADA_F_GETFD) /= -1
+      and then Errors.Get_Errno /= Errors.ADA_EBADF;
    end Valid_Fd;
+
+   function FD_Flags (Fd : Int) return Int is
+   begin
+       -- ??? This function modifies Errors.Errors_State, but we cannot mention
+       -- this because this function is supposed to be used in specs/contracts.
+       -- ??? why is this GETFD instead of GETFL?
+      return Const_H.fcntl(fd, Const_H.ADA_F_GETFD);
+   end FD_Flags;
 
    procedure Open (File : char_array; Flags : int; Fd : out Int) is
    begin
