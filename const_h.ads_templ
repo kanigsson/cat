@@ -1,0 +1,39 @@
+#include <fcntl.h>
+with Interfaces.C; use Interfaces.C;
+package Const_H is
+   ADA_F_DUPFD : constant Int := F_DUPFD;
+   ADA_F_DUPFD_CLOEXEC : constant Int := F_DUPFD_CLOEXEC;
+   ADA_F_GETFD : constant Int := F_GETFD;
+   ADA_F_SETFD : constant Int := F_SETFD;
+   ADA_F_GETFL : constant Int := F_GETFL;
+   ADA_F_SETFL : constant Int := F_SETFL;
+   ADA_F_GETLK : constant Int := F_GETLK;
+   ADA_F_SETLK : constant Int := F_SETLK;
+   ADA_F_SETLKW : constant Int := F_SETLKW;
+   ADA_F_GETOWN : constant Int := F_GETOWN;
+   ADA_F_SETOWN : constant Int := F_SETOWN;
+   ADA_FD_CLOEXEC : constant Int := FD_CLOEXEC;
+   ADA_F_RDLCK : constant Int := F_RDLCK;
+   ADA_F_UNLCK : constant Int := F_UNLCK;
+   ADA_F_WRLCK : constant Int := F_WRLCK;
+   ADA_O_CLOEXEC : constant Int := O_CLOEXEC;
+   ADA_O_CREAT : constant Int := O_CREAT;
+   ADA_O_DIRECTORY : constant Int := O_DIRECTORY;
+   ADA_O_EXCL : constant Int := O_EXCL;
+   ADA_O_NOCTTY : constant Int := O_NOCTTY;
+   ADA_O_NOFOLLOW : constant Int := O_NOFOLLOW;
+   ADA_O_TRUNC : constant Int := O_TRUNC;
+   ADA_O_APPEND : constant Int := O_APPEND;
+   ADA_O_DSYNC : constant Int := O_DSYNC;
+   ADA_O_NONBLOCK : constant Int := O_NONBLOCK;
+   ADA_O_RSYNC : constant Int := O_RSYNC;
+   ADA_O_SYNC : constant Int := O_SYNC;
+   ADA_O_ACCMODE : constant Int := O_ACCMODE;
+   ADA_O_RDONLY : constant Int := O_RDONLY;
+   ADA_O_RDWR : constant Int := O_RDWR;
+   ADA_O_WRONLY : constant Int := O_WRONLY;
+   ADA_AT_FDCWD : constant Int := AT_FDCWD;
+   ADA_AT_EACCESS : constant Int := AT_EACCESS;
+   ADA_AT_SYMLINK_NOFOLLOW : constant Int := AT_SYMLINK_NOFOLLOW;
+end Const_H;
+

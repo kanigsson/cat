@@ -1,6 +1,7 @@
-with System;
+with System; --with Ada.Text_IO; use Ada.Text_IO;
 
-package body Stdio with SPARK_Mode => Off is
+package body Stdio with SPARK_Mode => Off
+is
 
    function C_Open (File : char_array; Flags : int) return int;
    pragma Import (C, C_Open, "open");
@@ -29,11 +30,13 @@ package body Stdio with SPARK_Mode => Off is
    procedure Read (Fd : int; Buf : out Init_String; Has_Read : out ssize_t) is
    begin
       Has_Read := C_Read (Fd, Buf'Address, Buf'Length, 0);
+      Append_Pcd (Contents (Fd), Buf, Has_Read);
    end Read;
 
    procedure Write (Fd : int; Buf : in Init_String; Num_Bytes : Size_T; Has_Written : out ssize_t) is
    begin
       Has_Written := C_Write (Fd, Buf'Address, Num_Bytes);
+      Append_Pcd (Contents (Fd), Buf, Has_Written);
    end Write;
 
 end Stdio;

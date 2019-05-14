@@ -1,7 +1,8 @@
 with Interfaces.C; use Interfaces.C;
-package Errors 
-   with Abstract_State => (Error_State),
-   SPARK_Mode
+package Errors with
+  SPARK_Mode     => On,
+  Abstract_State => (Error_State),
+  Initializes    => (Error_State)
 is
    
    ADA_EPERM : constant Int := 1;
