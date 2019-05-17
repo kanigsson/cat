@@ -1,8 +1,8 @@
 with System; --with Ada.Text_IO; use Ada.Text_IO;
 
-package body Stdio with SPARK_Mode => Off
+package body Stdio with
+  SPARK_Mode => Off
 is
-
    function C_Open (File : char_array; Flags : int) return int;
    pragma Import (C, C_Open, "open");
 
@@ -20,23 +20,37 @@ is
    procedure Open (File : char_array; Flags : int; Fd : out Int) is
    begin
       Fd := C_Open (File, Flags);
+      if Fd >= 0 then
+        Insert (Contents, Fd, Empty_Unbounded_String);
+      end if;
    end Open;
 
    procedure Close (Fd : int; Result : out Int) is
    begin
       Result := C_Close (Fd);
+      if Result = 0 then
+        Delete (Contents, Fd);
+      end if;
    end Close;
 
    procedure Read (Fd : int; Buf : out Init_String; Has_Read : out ssize_t) is
    begin
       Has_Read := C_Read (Fd, Buf'Address, Buf'Length, 0);
-      Append_Pcd (Contents (Fd), Buf, Has_Read);
+      if Has_Read > 0 then
+        Replace (Contents, Fd, Append (Element (Contents, Fd), Buf, Has_Read));
+      end if;
    end Read;
 
    procedure Write (Fd : int; Buf : in Init_String; Num_Bytes : Size_T; Has_Written : out ssize_t) is
    begin
       Has_Written := C_Write (Fd, Buf'Address, Num_Bytes);
-      Append_Pcd (Contents (Fd), Buf, Has_Written);
+      if Has_Written > 0 then
+        Replace (Contents, Fd, Append (Element (Contents, Fd), Buf, Has_Written));
+      end if;
    end Write;
 
+begin
+   Insert (Contents, Stdin,  Empty_Unbounded_String);
+   Insert (Contents, Stdout, Empty_Unbounded_String);
+   Insert (Contents, Stderr, Empty_Unbounded_String);
 end Stdio;
