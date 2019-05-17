@@ -80,27 +80,6 @@ is
            = To_String (Left)
            & To_String (Right (Right'First .. Right'First - 1 + Natural (Bytes))));
 
---        procedure Append_Pcd
---          (Left  : in out Unbounded_String;
---           Right : Init_String;
---           Bytes : Int)
---          with
---            Global => null,
---            Pre =>
---              (if Bytes >= 0
---                 then
---                   Natural (Bytes) <= Right'Length
---               and then
---                 Natural (Bytes) <= Natural'Last - Length (Left)
---               and then
---                 Right (Right'First.. Right'First - 1 + Natural (Bytes))'Valid_Scalars),
---          Post =>
---            (if Bytes <= 0
---               then To_String (Left) = To_String (Left'Old)
---                   else To_String (Left)
---             = To_String (Left'Old)
---             & To_String (Right (Right'First .. Right'First - 1 + Natural (Bytes))));
-
       procedure Append_Def
         (Left  : Unbounded_String;
          Right : Init_String;

@@ -8,7 +8,10 @@ package Contents_Table_Type with
   SPARK_Mode
 is
    use Iostr.Ghost_Package;
-   function Hash_Int (X : Int) return Hash_Type is (Hash_Type (X));
+
+   subtype pos_int is Int range 0 .. Int'Last;
+
+   function Hash_Int (X : pos_int) return Hash_Type is (Hash_Type (X));
    package Formal_Maps is new Ada.Containers.Formal_Hashed_Maps
      (Key_Type        => int,
       Element_Type    => Unbounded_String,

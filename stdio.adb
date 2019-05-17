@@ -49,6 +49,12 @@ is
       end if;
    end Write;
 
+   procedure Reset (Fd : int) is
+   begin
+      if Contains (Contents, Fd) then
+         Replace (Contents, Fd, Empty_Unbounded_String);
+      end if;
+   end Reset;
 begin
    Insert (Contents, Stdin,  Empty_Unbounded_String);
    Insert (Contents, Stdout, Empty_Unbounded_String);

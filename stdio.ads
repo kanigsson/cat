@@ -106,6 +106,19 @@ is
        Element (Contents, Fd) = Append (Element (Contents'Old, Fd), Buf, Has_Written)
          and then
        M.Elements_Equal_Except (Model (Contents), Model (Contents'Old), Fd);
+       
+   procedure Reset (Fd : int) with
+     Ghost,
+     Global => (In_Out => Contents),
+     Post   =>
+       (if not Contains (Contents'Old, Fd)
+          then Contents'Old = Contents
+        else
+          M.Same_Keys (Model (Contents), Model (Contents'Old))
+            and then
+          M.Elements_Equal_Except (Model (Contents), Model (Contents'Old), Fd)
+            and then
+          Length (Element (Contents, Fd)) = 0);
 
 
    Stdin  : constant int := 0;
