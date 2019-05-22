@@ -4,6 +4,7 @@ with Interfaces.C; use Interfaces.C;
 package Iostr with
   SPARK_Mode => On
 is
+   pragma Annotate (GNATProve, Terminating, Iostr);
 
    subtype ssize_t is int;
 
@@ -23,8 +24,17 @@ is
       type Unbounded_String is private with
         Default_Initial_Condition => Length (Unbounded_String) = 0;
 
+      type Unbounded_String_Holder is record
+        String : Unbounded_String;
+      end record;
+
       function Empty_Unbounded_String return Unbounded_String with
         Post => Length (Empty_Unbounded_String'Result) = 0;
+
+      function Empty_Unbounded_String_Holder return Unbounded_String_Holder is
+        (Unbounded_String_Holder'(String => Empty_Unbounded_String))
+      with
+        Post => Length (Empty_Unbounded_String_Holder'Result.String) = 0;
 
       function Length (Source : Unbounded_String) return Natural with Global => null;
 
@@ -51,14 +61,6 @@ is
                  then To_String ("&"'Result) = To_String (L)
                  else To_String ("&"'Result) = To_String (L) & To_String (R));
 
-      procedure U_Append_Def (L, R : Unbounded_String) with
-        Pre  => Length (L) <= Natural'Last - Length (R),
-        Post =>
-          (if Length (R) = 0
-                 then To_String (L & R) = To_String (L)
-                 else To_String (L & R) = To_String (L) & To_String (R));
-      procedure U_Append_Def (L, R : Unbounded_String) is null;
-
       function Append
         (Left  : Unbounded_String;
          Right : Init_String;
@@ -79,41 +81,6 @@ is
                  else To_String (Append'Result)
            = To_String (Left)
            & To_String (Right (Right'First .. Right'First - 1 + Natural (Bytes))));
-
-      procedure Append_Def
-        (Left  : Unbounded_String;
-         Right : Init_String;
-         Bytes : Int)
-        with
-          Ghost,
-          Pre =>
-            Bytes > 0
-            and then
-              Natural (Bytes) <= Right'Length
-        and then
-          Natural (Bytes) <= NAtural'LAst - Length (Left)
-        and then
-          Right (Right'First.. Right'First - 1 + Natural (Bytes))'Valid_Scalars,
-          Post =>
-            To_String (Append (Left, Right, Bytes))
-              = To_String (Left)
-        & To_String (Right (Right'First .. Right'First - 1 + Natural (Bytes)));
-
-      procedure Append_Def
-        (Left  : Unbounded_String;
-         Right : Init_String;
-         Bytes : Int)
-      is null;
-
-      procedure String_Append_Equal (A, B, C, D : String) with
-        Pre  =>
-          A = B
-          and then C = D
-          and then A'First = 1
-          and then B'First = 1
-          and then C'Length <= Natural'Last - A'Length,
-          Post => A & C = B & D;
-      procedure String_Append_Equal (A, B, C, D : String) is null;
 
    private
 

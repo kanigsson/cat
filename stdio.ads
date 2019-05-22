@@ -15,10 +15,13 @@ package Stdio with
     (Contains (Contents, Stdin)
        and then Contains (Contents, Stdout)
        and then Contains (Contents, Stderr)
-       and then Length (Element (Contents, Stdin)) = 0
-       and then Length (Element (Contents, Stdout)) = 0
-       and then Length (Element (Contents, Stderr)) = 0)
+       and then Length (Element (Contents, Stdin).String) = 0
+       and then Length (Element (Contents, Stdout).String) = 0
+       and then Length (Element (Contents, Stderr).String) = 0)
 is
+
+   pragma Elaborate_Body;
+   
    use Iostr.Ghost_Package;
    use Formal_Maps;
    use Formal_Maps.Formal_Model;
@@ -38,7 +41,7 @@ is
           and then
         Contains (Contents, Fd)
           and then
-        Length (Element (Contents, Fd)) = 0
+        Length (Element (Contents, Fd).String) = 0
           and then
         not Contains (Contents'Old, Fd)
           and then
@@ -81,7 +84,7 @@ is
                and then
              M.Same_Keys (Model (Contents), Model (Contents'Old))
                and then
-             Element (Contents, Fd) = Append (Element (Contents'Old, Fd), Buf, Has_Read)
+             Element (Contents, Fd).String = Append (Element (Contents'Old, Fd).String, Buf, Has_Read)
                and then
              M.Elements_Equal_Except (Model (Contents), Model (Contents'Old), Fd)));
 
@@ -99,11 +102,13 @@ is
      Post   =>
        Num_Bytes = Size_T (Has_Written)
          and then
+       Natural (Has_Written) <= Buf'Length
+         and then 
        Contains (Contents, Fd)
          and then
        M.Same_Keys (Model (Contents), Model (Contents'Old))
          and then
-       Element (Contents, Fd) = Append (Element (Contents'Old, Fd), Buf, Has_Written)
+       Element (Contents, Fd).String = Append (Element (Contents'Old, Fd).String, Buf, Has_Written)
          and then
        M.Elements_Equal_Except (Model (Contents), Model (Contents'Old), Fd);
        
@@ -118,7 +123,7 @@ is
             and then
           M.Elements_Equal_Except (Model (Contents), Model (Contents'Old), Fd)
             and then
-          Length (Element (Contents, Fd)) = 0);
+          Length (Element (Contents, Fd).String) = 0);
 
 
    Stdin  : constant int := 0;
