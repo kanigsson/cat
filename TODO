@@ -1,2 +1,2 @@
-* Find a solution to import O_RDONLY, O_RDWR, etc constants into Ada
-  -> write small C program to generate the .ads file we want, that's the best!
+* Rewrite contract of Write to take into account the case when Has_Written < Has_Read
+* Modify implementation and proof to make it prove

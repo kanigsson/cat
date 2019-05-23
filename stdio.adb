@@ -58,7 +58,7 @@ is
    end Reset;
 
 begin
-   Insert (Contents, Stdin, Null_Unbounded_String_Holder);
+   Insert (Contents, Stdin,  Null_Unbounded_String_Holder);
    Insert (Contents, Stdout, Null_Unbounded_String_Holder);
    Insert (Contents, Stderr, Null_Unbounded_String_Holder);
 end Stdio;

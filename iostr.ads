@@ -15,11 +15,11 @@ is
 
    package Ghost_Package is
       function To_String (Source : Init_String) return String with
+        Global => null,
         Pre    => Source'Valid_Scalars,
         Post   =>
           To_String'Result'First = 1
-            and then To_String'Result'Last = Source'Length,
-        Global => null;
+            and then To_String'Result'Last = Source'Length;
 
       type Unbounded_String is private with
         Default_Initial_Condition => Length (Unbounded_String) = 0;
@@ -28,19 +28,24 @@ is
         String : Unbounded_String;
       end record;
 
-      Null_Unbounded_String : constant Unbounded_String;
+      function Null_Unbounded_String return Unbounded_String with
+        Global => null,
+        Post   => Length (Null_Unbounded_String'Result) = 0;
 
       function Null_Unbounded_String_Holder return Unbounded_String_Holder is
         (Unbounded_String_Holder'(String => Null_Unbounded_String))
       with
-        Post => Length (Null_Unbounded_String_Holder'Result.String) = 0;
+        Global => null,
+        Post   => Length (Null_Unbounded_String_Holder'Result.String) = 0;
 
       function To_Unbounded_String_Holder
         (Source : Unbounded_String)
-         return Unbounded_String_Holder
-      is (Unbounded_String_Holder'(String => Source));
+         return   Unbounded_String_Holder
+      is
+        (Unbounded_String_Holder'(String => Source));
 
-      function Length (Source : Unbounded_String) return Natural with Global => null;
+      function Length (Source : Unbounded_String) return Natural with
+        Global => null;
 
       function To_String (Source : Unbounded_String) return String with
         Global => null,
@@ -48,12 +53,12 @@ is
           To_String'Result'First = 1
             and then To_String'Result'Last = Length (Source);
 
-      function "=" (L, R : Unbounded_String) return Boolean is
-        (To_String (L) = To_String (R))
-          with
-            Global => null;
+      function "=" (L, R : Unbounded_String) return Boolean with
+        Global => null,
+        Post   => "="'Result = (To_String (L) = To_String (R));
 
       function "&" (L, R : Unbounded_String) return Unbounded_String with
+        Global         => null,
         Contract_Cases =>
           (Length (R) = 0
              or else
@@ -75,8 +80,8 @@ is
          Bytes : Int)
       return     Unbounded_String
         with
-          Global => null,
-          Pre =>
+          Global       => null,
+          Pre          =>
             (if Bytes >= 0
             then
               Natural (Bytes) <= R'Length
@@ -107,9 +112,12 @@ is
       pragma SPARK_Mode (Off);
       package ASU renames Ada.Strings.Unbounded;
 
-      type Unbounded_String is new ASU.Unbounded_String;
+      type Unbounded_String is record
+        Str : ASU.Unbounded_String;
+      end record;
 
-      Null_Unbounded_String : constant Unbounded_String := Unbounded_String (ASU.Null_Unbounded_String);
+      function Null_Unbounded_String return Unbounded_String is
+        (Unbounded_String'(Str => ASU.Null_Unbounded_String));
 
       end Ghost_Package;
 end Iostr;

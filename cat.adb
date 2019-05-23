@@ -82,9 +82,6 @@ is
                           Element (Contents_Old, Stdout).String,
                           Element (Contents_Pcd_Entry, Stdout).String,
                           Element (Contents_Old, Input).String);
---              pragma Assert (Element (Contents, Stdout).String
---                             = Element (Contents_Pcd_Entry, Stdout).String
---                             & Element (Contents_Old, Input).String);
             Equal_And_Append (Element (Contents, Stdout).String,
                               Element (Contents_Pcd_Entry, Stdout).String,
                               Element (Contents_Old, Input).String,
