@@ -4,8 +4,9 @@ project Cat is
   for Object_Dir use "obj";
   for Main use ("cat.adb");
   for Exec_Dir use "bin";
+
   package Compiler is
---     for Switches ("Ada") use ("-gnata", "-g");
-      for Switches ("Ada") use ("-g");
+      for Switches ("Ada") use ("-gnata", "-g");
+--        for Switches ("Ada") use ("-g");
   end Compiler;
 end Cat;

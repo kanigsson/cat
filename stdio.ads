@@ -26,7 +26,7 @@ is
    use Formal_Maps;
    use Formal_Maps.Formal_Model;
    
-   Contents : Map (1023, Default_Modulus (1023)) with Ghost;
+   Contents : Map (1023, Default_Modulus (1023));
    
    subtype off_t is int;
 
@@ -54,7 +54,7 @@ is
      Post   =>
        (Result = -1 and then Contents = Contents'Old)
           or else
-       (Fd = 0
+       (Result = 0
           and then
         Length (Contents) = Length (Contents'Old) - 1
           and then

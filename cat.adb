@@ -60,28 +60,31 @@ is
                      & Element (Contents_Old, Input).String);
       loop
          Contents_Old := Contents;
-
+            pragma Assert (Element (Contents_Old, Stdout).String
+                           = Element (Contents_Pcd_Entry, Stdout).String
+                           & Element (Contents_Old, Input).String);
          Read (Input, Buf, Has_Read);
-
-         pragma Assert (Element (Contents, Input).String
-                        = Append (Element (Contents_Old, INput).String,
-                                  Buf,
-                                  Has_Read));
-         pragma Assert (Element (Contents, Stdout) = Element (Contents_Old, Stdout));
+         pragma Assert (Element (Contents, Stdout).String
+                        = Element (Contents_Old, Stdout).String);
          pragma Assert (M.Elements_Equal_Except
                          (Model (Contents),
                           Model (Contents_Pcd_Entry),
                           Input,
                           Stdout));
-         if Has_Read <= 0 then
-            pragma Assert (Length (Element (Contents_Pcd_Entry, Stdout).String)
-                           <= Natural'Last - Length (Element (Contents_Old, Input).String));
-            pragma Assert (Element (Contents, Stdout).String
-                           = Element (Contents_Pcd_Entry, Stdout).String
-                           & Element (Contents_Old, Input).String);
 
-            pragma Assert (Length (Element (Contents_Old, Input).String)
-                           <= Natural'Last - Length (Element (Contents_Pcd_Entry, Stdout).String));
+         pragma Assert (Element (Contents, Input).String
+                        = Append (Element (Contents_Old, INput).String,
+                                  Buf,
+                                  Has_Read));
+
+         if Has_Read <= 0 then
+            Equal_String (Element (Contents, Stdout).String,
+                          Element (Contents_Old, Stdout).String,
+                          Element (Contents_Pcd_Entry, Stdout).String,
+                          Element (Contents_Old, Input).String);
+--              pragma Assert (Element (Contents, Stdout).String
+--                             = Element (Contents_Pcd_Entry, Stdout).String
+--                             & Element (Contents_Old, Input).String);
             Equal_And_Append (Element (Contents, Stdout).String,
                               Element (Contents_Pcd_Entry, Stdout).String,
                               Element (Contents_Old, Input).String,
@@ -94,22 +97,14 @@ is
          pragma Assert (Size_T (Has_Read) <= Buf'Length);
          Write (Stdout, Buf, Size_T (Has_Read), Has_Written);
 
-         pragma Assert (Size_T (Has_Read) = Size_T (Has_Written));
          pragma Assert (Natural (Size_T (Has_Read)) = Natural (Size_T (Has_Written)));
          pragma Assert (Natural (Has_Read) = NAtural (Has_Written));
-         pragma Assert (NAtural (Has_Written) <= Natural'Last - Length (Old_Stdout));
          Equal_And_Append (Element (Contents, Stdout).String,
                            Old_Stdout,
                            ELement (Contents_Old, Stdout).String,
                            Buf,
                            Has_Written);
          Prove_Equality (Contents, Contents_Old, Contents_Pcd_Entry, Buf, Has_Read, Has_Written, Input, Stdout);
-
-         pragma Assert (M.Elements_Equal_Except
-                        (Model (Contents),
-                           Model (Contents_Pcd_Entry),
-                           Stdout,
-                           Input));
 
          pragma Loop_Invariant (M.Same_Keys
                                   (Model (Contents_Pcd_Entry),

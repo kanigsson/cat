@@ -10,9 +10,18 @@ is
    use FOrmal_Maps;
    use FOrmal_Maps.Formal_Model;
 
-   ---------------------
-   --  String lemmas  --
-   ---------------------
+   procedure Equal_String
+     (Str_1, Str_2, Left, Right : Unbounded_String)
+   with
+     Pre =>
+       Str_1 = Str_2
+         and then
+       Str_2 = Left & Right,
+     Post => Str_1 = Left & Right;
+
+   procedure Equal_String
+     (Str_1, Str_2, Left, Right : Unbounded_String)
+   is null;
 
    procedure Equal_And_Append
      (Str, Left_1, Left_2 : Unbounded_String;
@@ -23,8 +32,8 @@ is
        Bytes in 0 .. Buf'Length
          and then
        Left_1 = Left_2
-         and then
-       Natural (Bytes) <= Natural'Last - Length (Left_1)
+--           and then
+--         Natural (Bytes) <= Natural'Last - Length (Left_1)
          and then
        Buf (Buf'First.. Buf'First - 1 + Natural (Bytes))'Valid_Scalars
          and then
@@ -42,8 +51,8 @@ is
     with
       Pre  =>
         Right_1 = Right_2
-          and then
-        Length (Right_1) <= Natural'Last - Length (Left)
+--            and then
+--          Length (Right_1) <= Natural'Last - Length (Left)
           and then
         Str = Left & Right_1,
       Post => Str = Left & Right_2;
@@ -70,20 +79,20 @@ is
      M.Same_Keys (Model (Contents), Model (Contents_Old))
        and then
      M.Same_Keys (Model (Contents), MOdel (Contents_Pcd_Entry))
-       and then
-     Length (Element (Contents_Pcd_Entry, Stdout).String)
-             <= Natural'Last - Length (Element (Contents_Old, Input).String)
+--         and then
+--       Length (Element (Contents_Pcd_Entry, Stdout).String)
+--               <= Natural'Last - Length (Element (Contents_Old, Input).String)
        and then
      Element (Contents_Old, Stdout).String
      = Element (Contents_Pcd_Entry, Stdout).String
      & Element (Contents_Old, Input).String
-       and then
-     NAtural (Has_Written) <= Natural'Last - Length (Element (Contents_Old, Stdout).String)
+--         and then
+--       NAtural (Has_Written) <= Natural'Last - Length (Element (Contents_Old, Stdout).String)
        and then
      Element (Contents, Stdout).String
      = Append (Element (Contents_Old, Stdout).String, Buf, Has_Written)
-       and then
-     NAtural (Has_Read) <= Natural'Last - Length (Element (Contents_Old, Input).String)
+--         and then
+--       NAtural (Has_Read) <= Natural'Last - Length (Element (Contents_Old, Input).String)
        and then
      Element (Contents, Input).String
      = Append (Element (Contents_Old, Input).String, Buf, Has_Read),

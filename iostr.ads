@@ -1,5 +1,5 @@
 with Interfaces.C; use Interfaces.C;
---with Init_Strings; use Init_Strings;
+private with Ada.Strings.Unbounded;
 
 package Iostr with
   SPARK_Mode => On
@@ -13,7 +13,7 @@ is
 
    type Init_String is array (Positive range <>) of Init_Char;
 
-   package Ghost_Package with Ghost is
+   package Ghost_Package is
       function To_String (Source : Init_String) return String with
         Pre    => Source'Valid_Scalars,
         Post   =>
@@ -28,13 +28,17 @@ is
         String : Unbounded_String;
       end record;
 
-      function Empty_Unbounded_String return Unbounded_String with
-        Post => Length (Empty_Unbounded_String'Result) = 0;
+      Null_Unbounded_String : constant Unbounded_String;
 
-      function Empty_Unbounded_String_Holder return Unbounded_String_Holder is
-        (Unbounded_String_Holder'(String => Empty_Unbounded_String))
+      function Null_Unbounded_String_Holder return Unbounded_String_Holder is
+        (Unbounded_String_Holder'(String => Null_Unbounded_String))
       with
-        Post => Length (Empty_Unbounded_String_Holder'Result.String) = 0;
+        Post => Length (Null_Unbounded_String_Holder'Result.String) = 0;
+
+      function To_Unbounded_String_Holder
+        (Source : Unbounded_String)
+         return Unbounded_String_Holder
+      is (Unbounded_String_Holder'(String => Source));
 
       function Length (Source : Unbounded_String) return Natural with Global => null;
 
@@ -44,61 +48,68 @@ is
           To_String'Result'First = 1
             and then To_String'Result'Last = Length (Source);
 
-      procedure Reset (Source : in out Unbounded_String) with
-        Import,
-        Post => Length (Source) = 0;
-
       function "=" (L, R : Unbounded_String) return Boolean is
         (To_String (L) = To_String (R))
           with
             Global => null;
 
       function "&" (L, R : Unbounded_String) return Unbounded_String with
-        Import,
-        Pre  => Length (L) <= Natural'Last - Length (R),
-        Post =>
-          (if Length (R) = 0
-                 then To_String ("&"'Result) = To_String (L)
-                 else To_String ("&"'Result) = To_String (L) & To_String (R));
-
+        Contract_Cases =>
+          (Length (R) = 0
+             or else
+           Length (L) = Natural'Last    => To_String ("&"'Result) = To_String (L),
+           Length (R) > 0
+             and then
+           Length (R)
+           <= Natural'Last - Length (L) => To_String ("&"'Result)
+                                           = To_String (L) & To_String (R),
+           others                       => To_String ("&"'Result)
+                                           = To_String (L)
+                                           & To_String (R)
+                                               (1
+                                                 ..
+                                                Natural'Last - Length (L)));
       function Append
-        (Left  : Unbounded_String;
-         Right : Init_String;
+        (L  : Unbounded_String;
+         R : Init_String;
          Bytes : Int)
       return     Unbounded_String
         with
           Global => null,
           Pre =>
             (if Bytes >= 0
-               then Natural (Bytes) <= Right'Length
+            then
+              Natural (Bytes) <= R'Length
+                and then
+              R (R'First.. R'First - 1 + Natural (Bytes))'Valid_Scalars),
+        Contract_Cases =>
+          (Bytes <= 0
+             or else
+           Length (L) = Natural'Last    => To_String (Append'Result) = To_String (L),
+           Bytes > 0
              and then
-               Natural (Bytes) <= Natural'Last - Length (Left)
-             and then
-               Right (Right'First.. Right'First - 1 + Natural (Bytes))'Valid_Scalars),
-        Post =>
-          (if Bytes <= 0
-             then To_String (Append'Result) = To_String (Left)
-                 else To_String (Append'Result)
-           = To_String (Left)
-           & To_String (Right (Right'First .. Right'First - 1 + Natural (Bytes))));
+           Natural (Bytes)
+           <= Natural'Last - Length (L) => To_String (Append'Result)
+                                           = To_String (L)
+                                           & To_String
+                                               (R (R'First
+                                                     ..
+                                                   R'First - 1 + Natural (Bytes))),
+           others                       => To_String (Append'Result)
+                                           = To_String (L)
+                                           & To_String
+                                               (R (R'First
+                                                     ..
+                                                   Natural'Last - Length (L) - 1 + R'First)));
 
    private
 
       pragma SPARK_Mode (Off);
+      package ASU renames Ada.Strings.Unbounded;
 
-         type String_Access_Base is access all String;
+      type Unbounded_String is new ASU.Unbounded_String;
 
-         subtype String_Access is not null String_Access_Base;
+      Null_Unbounded_String : constant Unbounded_String := Unbounded_String (ASU.Null_Unbounded_String);
 
-         function Init_Content (L : Natural := 100) return String_Access;
-
-         type Unbounded_String is record
-            Length  : Natural := 0;
-            Content : String_Access := Init_Content;
-         end record;
-
-         function Empty_Unbounded_String return Unbounded_String is
-           (Unbounded_String'(Length => 0, Content => Init_Content));
-
-   end Ghost_Package;
+      end Ghost_Package;
 end Iostr;
