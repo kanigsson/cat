@@ -1,4 +1,6 @@
-package body Lemmas is
+package body Lemmas with
+  SPARK_Mode => On
+is
 
    procedure Equal_And_Append
      (Str, Left_1, Left_2 : Unbounded_String;
@@ -13,7 +15,7 @@ package body Lemmas is
    procedure Prove_Equality
      (Contents,	Contents_Old, Contents_Pcd_Entry : Map;
       Buf     	                                 : Init_String;
-      Has_Read, Has_Written                      : ssize_t;
+      Has_Read                                   : ssize_t;
       Input, Stdout                              : Int)
    is
    begin

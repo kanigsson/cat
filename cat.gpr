@@ -7,6 +7,6 @@ project Cat is
 
   package Compiler is
       for Switches ("Ada") use ("-gnata", "-g");
---        for Switches ("Ada") use ("-g");
+  --      for Switches ("Ada") use ("-g");
   end Compiler;
 end Cat;

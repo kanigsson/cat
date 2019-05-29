@@ -13,7 +13,7 @@ is
 
    type Init_String is array (Positive range <>) of Init_Char;
 
-   package Ghost_Package is
+   package Ghost_Package with Ghost is
       function To_String (Source : Init_String) return String with
         Global => null,
         Pre    => Source'Valid_Scalars,

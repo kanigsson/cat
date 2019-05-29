@@ -4,6 +4,7 @@ with Interfaces.C;   use Interfaces.C;
 with Iostr;          use Iostr;
 
 package Contents_Table_Type with
+  Ghost,
   SPARK_Mode
 is
    use Iostr.Ghost_Package;

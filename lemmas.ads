@@ -35,7 +35,7 @@ is
          and then
        Buf (Buf'First.. Buf'First - 1 + Natural (Bytes))'Valid_Scalars
          and then
-       Str = Append (Left_1, Buf, Bytes),
+       Str = Append (Left_1, Buf (Buf'First .. Buf'First - 1 + NAtural (Bytes)), Bytes),
      Post =>
        Str = Append (Left_2, Buf, Bytes);
 
@@ -52,14 +52,14 @@ is
       (Str, Left, Right_1, Right_2 : Unbounded_String)
    is null;
 
+
+
    procedure Prove_Equality
      (Contents, Contents_Old, Contents_Pcd_Entry : Map;
       Buf                                        : Init_String;
-      Has_Read, Has_Written                      : ssize_t;
+      Has_Read                                   : ssize_t;
       Input, Stdout                              : Int) with
    Pre  =>
-     Has_Read = Has_Written
-       and then
      Has_Read in 0 .. Buf'Length
        and then
      Buf (Buf'First.. Buf'First - 1 + Natural (Has_Read))'Valid_Scalars
@@ -77,7 +77,7 @@ is
      & Element (Contents_Old, Input).String
        and then
      Element (Contents, Stdout).String
-     = Append (Element (Contents_Old, Stdout).String, Buf, Has_Written)
+     = Append (Element (Contents_Old, Stdout).String, Buf, Has_Read)
        and then
      Element (Contents, Input).String
      = Append (Element (Contents_Old, Input).String, Buf, Has_Read),
