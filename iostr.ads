@@ -53,6 +53,11 @@ is
           To_String'Result'First = 1
             and then To_String'Result'Last = Length (Source);
 
+      function Get (Source : Unbounded_String; J : Positive) return Character with
+        Global => null,
+        Pre    => J in 1 .. Length (Source),
+        Post   => Get'Result = To_String (Source) (J);
+
       function "=" (L, R : Unbounded_String) return Boolean with
         Global => null,
         Post   => "="'Result = (To_String (L) = To_String (R));

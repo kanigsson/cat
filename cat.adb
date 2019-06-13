@@ -42,7 +42,7 @@ is
          Element (Contents, Stdout).String
          = Element (Contents'Old, Stdout).String & Element (Contents, Input).String)
          and then
-       M.Elements_Equal_Except (Model (Contents), Model (Contents'Old), Stdout, Input);
+       M.Elements_Equal_Except (Model (Contents), Model (Contents'Old), Input, Stdout);
 
    procedure Copy_To_Stdout (Input : int; Err : out int) is
       Contents_Pcd_Entry : constant Map (1023, Default_Modulus (1023)) := Contents with Ghost;
@@ -51,7 +51,6 @@ is
       Buf : Init_String (1 .. 1024);
       Has_Read : ssize_t;
    begin
-
       pragma Assert (M.Elements_Equal_Except
                       (Model (Contents),
                        MOdel (Contents_Pcd_Entry),
@@ -65,6 +64,7 @@ is
             pragma Assert (Element (Contents_Old, Stdout).String
                            = Element (Contents_Pcd_Entry, Stdout).String
                            & Element (Contents_Old, Input).String);
+
          Read (Input, Buf, Has_Read);
          pragma Assert (Element (Contents, Stdout).String
                         = Element (Contents_Old, Stdout).String);
@@ -78,7 +78,6 @@ is
                         = Append (Element (Contents_Old, INput).String,
                                   Buf,
                                   Has_Read));
-
          if HAs_Read <= -1 then
            Err := -1;
            return;
@@ -98,9 +97,14 @@ is
            pragma Assert (Size_T (Has_Read) <= Buf'Length);
          Full_Write
            (Stdout,
-            Buf (Buf'First .. Buf'First - 1 + Natural (Has_Read)),
+            Buf,
             Size_T (Has_Read),
             Err);
+         pragma Assert (M.Elements_Equal_Except
+                        (Model (Contents),
+                           Model (Contents_Pcd_Entry),
+                           Input,
+                           Stdout));
          if Err <= -1 then
             return;
          end if;

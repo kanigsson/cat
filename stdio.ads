@@ -73,7 +73,10 @@ is
                 Proof_In => (FD_Table, Const_H.ADA_O_RDONLY, Const_H.ADa_O_RDWR)),
      Post =>
      (case Has_Read is
-        when -1 | 0           => Contents = Contents'Old,
+        when -1                => Contents = Contents'Old,
+        when 0                 =>
+          Contents = Contents'Old
+            and then Contains (Contents, Fd),
         when 1 .. Ssize_T'Last =>
           Natural (Has_Read) <= Buf'Length
             and then
@@ -96,12 +99,16 @@ is
    with
      Global => (In_Out => (Errors.Error_State, Contents)),
      Pre    =>
-       (Num_Bytes <= Buf'Length
+       (Num_Bytes <= Size_T (Integer'Last)
+         and then Integer (Num_Bytes) <= Buf'Length
          and then Num_Bytes > 0
          and then Buf (Buf'First .. Buf'First - 1 + Natural (Num_Bytes))'Valid_scalars),
      Post =>
        (case Has_Written is
-          when -1 | 0            => Contents = Contents'Old,
+          when -1                => Contents = Contents'Old,
+          when 0                 =>
+            Contents = Contents'Old
+              and then Contains (Contents, Fd),
           when 1 .. SSize_T'Last =>
             Size_T (Has_Written) <= Num_Bytes
               and then

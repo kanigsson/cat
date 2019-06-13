@@ -16,11 +16,11 @@ procedure Full_Write
 with
   SPARK_Mode => On,
   Pre    =>
-    (Num_Bytes < Size_T (Integer'Last)
-     and then Ssize_T (Num_Bytes) = Buf'Length
-     and then Buf'First = 1
+    (Num_Bytes <= Size_T (Integer'Last)
+     and then Ssize_T (Num_Bytes) <= Buf'Length
+     and then Buf'Last < Natural'Last
      and then Num_Bytes > 0
-     and then Buf'Valid_scalars),
+     and then Buf (Buf'First .. Buf'First - 1 + Natural (Num_Bytes))'Valid_Scalars),
   Post =>
     (case Err is
        when -1     =>

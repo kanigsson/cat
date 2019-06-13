@@ -1,15 +1,107 @@
 package body Lemmas with
   SPARK_Mode => On
 is
+   procedure Aux (A, B, C : String) with
+     Pre =>
+       A = B
+     and then
+       A'First = 1
+     and then
+       B'First = 1
+     and then
+       C'Length <= Natural'Last - A'Length,
+     Post => A & C = B & C;
+   procedure Aux (A, B, C : String) is null;
+
+   procedure Aux_1 (Str, L_1, L_2, R : String) with
+        Pre =>
+          L_1 = L_2
+            and then L_1'Length <= Natural'Last - R'Length
+            and then L_1'First = 1
+            and then L_2'First = 1
+            and then R'First = 1
+            and then Str = L_1 & R,
+        Post => Str = L_2 & R;
+   procedure Aux_1 (Str, L_1, L_2, R : String) is null;
+
+   procedure Aux_2 (Str, L, R_1, R_2 : String) with
+     Pre =>
+       R_1 = R_2
+         and then R_1'Length <= Natural'Last - L'Length
+         and then R_1'First = 1
+         and then R_2'First = 1
+         and then L'First = 1
+         and then Str = L & R_1,
+      Post => Str = L & R_2;
+   procedure Aux_2 (Str, L, R_1, R_2 : String) is null;
+
+   procedure Aux_3 (A, B, C, D : String) with
+     Pre =>
+       A'First = 1
+         and then B'First = 1
+         and then C'First = 1
+         and then D'First = 1
+         and then D'Length <= NAtural'Last - B'Length - C'Length
+         and then A = B & C & D,
+    Post => A = B & (C & D);
+   procedure Aux_3 (A, B, C, D : String) is null;
+
+   procedure Append_Length
+     (A : Unbounded_String;
+      Buf : Init_String;
+      Num_Bytes : Ssize_T)
+   with
+     Pre =>
+       Num_Bytes in 0 .. Buf'Length
+         and then
+       Buf (Buf'First .. Buf'First - 1 + Natural (Num_Bytes))'Valid_Scalars,
+     Post =>
+       Length (Append (A, Buf, Num_Bytes)) >= Length (A);
+   procedure Append_Length
+     (A : Unbounded_String;
+      Buf : Init_String;
+      Num_Bytes : Ssize_T)
+   is
+   begin
+      if Length (A) = Natural'Last or else Num_Bytes = 0 then
+         pragma Assert (Length (Append (A, Buf, Num_Bytes)) = Length (A));
+      else
+         pragma Assert (Length (Append (A, Buf, Num_Bytes)) >= Length (A));
+      end if;
+   end Append_Length;
 
    procedure Equal_And_Append
      (Str, Left_1, Left_2 : Unbounded_String;
       Buf                 : Init_String;
       Bytes               : Int)
    is
+
    begin
-      pragma Assert (Left_1 = Left_2);
-      pragma Assert (Append (Left_1, Buf, Bytes) = Append (Left_2, Buf, Bytes));
+      pragma Assert (To_String (Left_1) = To_String (Left_2));
+
+      if Natural (Bytes) <= Natural'Last - Length (Left_1) then
+         Aux (To_String (Left_1),
+              To_String (Left_2),
+              To_String (Buf (Buf'First .. Buf'First - 1 + Natural (Bytes))));
+         pragma Assert (To_String (Left_1)
+                          & To_String (Buf (Buf'First .. Buf'First - 1 + Natural (Bytes)))
+                        = To_String (Left_2)
+                          & To_String (Buf (Buf'First .. Buf'First - 1 + Natural (Bytes))));
+         pragma Assert (Append (Left_1, Buf, Bytes) = Append (Left_2, Buf, Bytes));
+      else
+         declare
+           New_Bytes : constant Natural := Natural'Last - Length (Left_1);
+         begin
+            Aux (To_String (Left_1),
+                 To_String (Left_2),
+                 To_String (Buf (Buf'First .. Buf'First - 1 + Natural (New_Bytes))));
+            pragma Assert (To_String (Left_1)
+                             & To_String (Buf (Buf'First .. Buf'First - 1 + New_Bytes))
+                           = To_String (Left_2)
+                             & To_String (Buf (Buf'First .. Buf'First - 1 + New_Bytes)));
+            pragma Assert (Append (Left_1, Buf, Bytes) = Append (Left_2, Buf, Bytes));
+         end;
+      end if;
    end Equal_And_Append;
 
    procedure Prove_Equality
@@ -19,12 +111,276 @@ is
       Input, Stdout                              : Int)
    is
    begin
-      pragma Assert
-        (Append
-           (Element (Contents_Pcd_Entry, Stdout).String & Element (Contents_Old, Input).String,
-            Buf,
-            Has_Read)
-         = Element (Contents_Pcd_Entry, Stdout).String
-         & Element (Contents, Input).String);
+      Substit (Element (Contents, Stdout).String,
+               Element (Contents_Old, Stdout).String,
+               Element (Contents_Pcd_Entry, Stdout).String,
+               Element (Contents_Old, Input).String,
+               Buf,
+               Has_Read);
+      Substit_2 (Element (Contents, Stdout).String,
+                 Element (Contents_Pcd_Entry, Stdout).String,
+                 Element (Contents_Old, Input).String,
+                 Buf,
+                 Has_Read);
+      Substit_3 (Element (Contents, Stdout).String,
+                 Element (Contents_Pcd_Entry, Stdout).String,
+                 Element (Contents_Old, Input).String,
+                 Element (Contents, Input).String,
+                 Buf,
+                 Has_Read);
    end Prove_Equality;
+
+   procedure Prove_Loop_Invariant
+     (Contents, Contents_Old, Contents_Pcd_Entry : Map;
+      Buf                                        : Init_String;
+      Has_Written, Has_Written_B, Num_Bytes_S    : ssize_t;
+      Fd                                         : Int)
+   is
+   begin
+      Prove_Loop_Invariant_String_Version
+        (Element (Contents, Fd).String,
+         Element (Contents_Old, Fd).String,
+         Element (Contents_Pcd_Entry, Fd).String,
+         Buf,
+         Has_Written,
+         Has_Written_B,
+         Num_Bytes_S);
+   end Prove_Loop_Invariant;
+
+   procedure Prove_Loop_Invariant_String_Version
+     (String, Old_String, Pcd_Entry_String    : Unbounded_String;
+      Buf                                     : Init_String;
+      Has_Written, Has_Written_B, Num_Bytes_S : Ssize_T)
+   is
+   begin
+      pragma Assert
+        (Buf (Buf'First .. Buf'First - 1 + Natural (Has_Written))
+         & Buf (Buf'First + Integer (Has_Written) .. Buf'Last)
+                 (Buf'First + Integer (Has_written)
+                    ..
+                  Buf'First - 1 + Integer (Has_Written) + Integer (HAs_Written_B))
+         = Buf (Buf'First
+                 ..
+                Buf'First - 1 + Integer (Has_Written) + Integer (Has_Written_B)));
+
+      if Has_Written_B = 0 then
+         pragma Assert
+           (String = Append (Pcd_Entry_String, Buf, Has_Written + Has_Written_B));
+
+      elsif Length (Old_String) = Natural'Last then
+         pragma Assert
+           (To_String (String) = To_String (Old_String));
+         pragma Assert
+           (Length (Old_String)
+            = Length (Append (Pcd_Entry_String, Buf, Has_Written)));
+         pragma Assert
+           (Length (Append (Pcd_Entry_String, Buf, Has_Written))
+            <= Length (Append (Pcd_Entry_String,
+                               Buf,
+                               Has_Written + Has_Written_B)));
+         pragma Assert
+           (Natural'Last = Length (Append (Pcd_Entry_String, Buf, Has_Written + HAs_Written_B)));
+
+         pragma Assert (To_String (Append (Pcd_Entry_String, Buf, Has_Written + Has_Written_B))
+                        = To_String (Append (Pcd_Entry_String, Buf, Has_Written)));
+         pragma Assert
+           (String = Append (Pcd_Entry_String, Buf, Has_Written + Has_Written_B));
+
+      elsif Integer (Has_Written_B) < Natural'Last - Length (Old_String) then
+         pragma Assert
+           (String = Append (Pcd_Entry_String, Buf, Has_Written + Has_Written_B));
+
+      else
+         pragma Assert
+           (String = Append (Pcd_Entry_String, Buf, Has_Written + Has_Written_B));
+      end if;
+   end Prove_Loop_Invariant_String_Version;
+
+   procedure Substit
+     (A, B, C, D : Unbounded_String;
+      Buf        : Init_String;
+      Has_Read   : Ssize_T)
+   is
+   begin
+
+      if Length (B) = Natural'Last or else Has_Read = 0 then
+         pragma Assert (A = Append (C & D, Buf, Has_Read));
+
+      elsif Natural (Has_Read) <= Natural'Last - Length (B) then
+
+         Aux_1 (To_String (A),
+                To_String (B),
+                To_String (C & D),
+                To_String (Buf (Buf'First .. Buf'First - 1 + Natural (Has_Read))));
+         pragma Assert (A = Append (C & D, Buf, Has_Read));
+
+      else
+         pragma Assert
+             (To_String (A)
+              = To_String (B)
+              & To_String (Buf (Buf'First .. Natural'Last - Length (B) - 1 + Buf'First)));
+         Aux_1 (To_String (A),
+                To_String (B),
+                To_String (C & D),
+                To_String (Buf (Buf'First .. Natural'Last - Length (B) - 1 + Buf'First)));
+         pragma Assert (Length (B) = Length (C & D));
+         pragma Assert (Natural (Has_Read) > Natural'Last - Length (C & D));
+         pragma Assert (A = Append (C & D, Buf, Has_Read));
+      end if;
+   end Substit;
+
+   procedure Substit_2
+     (A, B, C  : Unbounded_String;
+      Buf      : Init_String;
+      Has_Read : Ssize_T)
+   is
+
+      procedure Null_Has_Read with
+        Pre =>
+          Has_Read = 0
+            and then
+          A = Append (B & C, Buf, Has_Read),
+        Post => A = B & Append (C, Buf, Has_Read);
+
+      procedure Null_Has_Read is
+         procedure Lemma
+           (String    : Unbounded_String;
+            Buffer    : Init_String;
+            Num_Bytes : Ssize_T)
+           with
+             Pre => Num_Bytes = 0,
+             Post => Append (String, Buffer, Num_Bytes) = String;
+         procedure Lemma
+           (String    : Unbounded_String;
+            Buffer    : Init_String;
+            Num_Bytes : Ssize_T) is null;
+      begin
+         Lemma (B & C, Buf, Has_Read);
+         Equal_String (A, Append (B & C, Buf, Has_Read), B, C);
+         Lemma (C, Buf, Has_Read);
+         Equal_And_Append (A, B, C, Append (C, Buf, Has_Read));
+      end Null_Has_Read;
+
+      procedure Append_B_C_Has_Max_Length with
+        Pre =>
+          Has_Read in 1 .. Buf'Length
+            and then
+          Buf (Buf'First.. Buf'First - 1 + Natural (Has_Read))'Valid_Scalars
+            and then
+          A = Append (B & C, Buf, Has_Read)
+            and then
+          Length (B & C) = Natural'Last,
+        Post => A = B & Append (C, Buf, Has_Read);
+      procedure Append_B_C_Has_Max_Length is
+      begin
+         pragma Assert (Length (C) >= Natural'Last - Length (B));
+         Append_Length (C, Buf, Has_Read);
+         pragma Assert (To_String (Append (B & C, buf, Has_Read)) = To_String (B & C));
+         pragma Assert (To_String (A) = To_String (B & C));
+         pragma Assert (To_String (A) = To_string (B)
+                                      & To_String (C) (1 .. NAtural'Last - Length (B)));
+         pragma Assert (To_String (Append (C, Buf, Has_Read)) (1 .. Natural'Last - LEngth (B))
+                        = To_String (C) (1 .. NAtural'Last - LEngth (B)));
+         pragma Assert (A = B & Append (C, Buf, Has_Read));
+      end Append_B_C_Has_Max_Length;
+
+      procedure Has_Read_Less_Than_Length with
+        Pre =>
+          Has_Read in 1 .. Buf'Length
+            and then
+          Buf (Buf'First.. Buf'First - 1 + Natural (Has_Read))'Valid_Scalars
+            and then
+          A = Append (B & C, Buf, Has_Read)
+            and then
+          Natural (Has_Read) <= Natural'Last - Length (B & C)
+            and then
+          NAtural'Last /= Length (B & C),
+        Post => A = B & Append (C, Buf, HAs_Read);
+      procedure Has_Read_Less_Than_Length is
+      begin
+         Aux_1 (To_String (A),
+                To_String (B & C),
+                To_String (B) & To_String (C),
+                To_String (Buf (Buf'First .. Buf'First - 1 + Natural (Has_Read))));
+         Aux_3 (To_String (A),
+                To_String (B),
+                To_String (C),
+                To_String (Buf (Buf'First .. Buf'First - 1 + Natural (Has_Read))));
+         Aux_2 (To_String (A),
+                To_String (B),
+                To_String (C)
+                  & To_String
+                      (Buf (Buf'First
+                            ..
+                            Buf'First - 1 + Natural (Has_Read))),
+                To_String (Append (C, Buf, Has_Read)));
+         pragma Assert
+           (To_String (A)
+            = To_String (B)
+            & To_String (Append (C, Buf, Has_Read)));
+         pragma Assert (A = B & Append (C, Buf, Has_Read));
+      end Has_Read_Less_Than_Length;
+
+      procedure Has_Read_Greater_Than_Length with
+         Pre =>
+           Has_Read in 1 .. Buf'Length
+             and then
+           Buf (Buf'First.. Buf'First - 1 + Natural (Has_Read))'Valid_Scalars
+             and then
+           A = Append (B & C, Buf, Has_Read)
+             and then
+           Natural'Last /= Length (B & C)
+             and then
+           Natural (Has_Read) > Natural'Last - Length (B & C),
+         Post => A = B & Append (C, Buf, Has_Read);
+      procedure Has_Read_Greater_Than_Length is
+      begin
+         Aux_1 (To_String (A),
+                To_String (B & C),
+                To_String (B) & To_String (C),
+                To_String (Buf (Buf'First
+                                ..
+                                Natural'Last - Length (B) - Length (C) - 1 + Buf'First)));
+         Aux_3 (To_String (A),
+                To_String (B),
+                To_String (C),
+                To_String (Buf (Buf'First .. Natural'Last - Length (B) - Length (C) - 1 + Buf'First)));
+         pragma Assert (Length (B & C) /= Natural'Last
+                          and then Length (B & C) = Length (B) + Length (C));
+         pragma Assert (Natural (HAs_Read) > Natural'Last - Length (B) - Length (C));
+
+         if Natural (Has_Read) <= NAtural'Last - Length (C) then
+            pragma Assert (Length (Append (C, Buf, Has_Read)) >= Natural'Last - Length (B));
+         else
+            pragma Assert (Length (Append (C, Buf, Has_Read)) >= Natural'Last - Length (B));
+         end if;
+
+         pragma Assert
+           (To_String (C)
+               & To_String (Buf (Buf'First .. Natural'Last - Length (B) - Length (C) - 1 + Buf'First))
+            = To_String (Append (C, Buf, Has_Read)) (1 .. Natural'Last - Length (B)));
+         pragma Assert (Length (Append (C, Buf, Has_Read)) >= Natural'Last - Length (B));
+         Aux_2 (To_String (A),
+                To_String (B),
+                To_String (C)
+               & To_String (Buf (Buf'First .. Natural'Last - Length (B) - Length (C) - 1 + Buf'First)),
+                To_String (Append (C, Buf, Has_Read)) (1 .. Natural'Last - Length (B)));
+         pragma Assert
+           (To_String (A)
+            = To_String (B)
+            & To_String (Append (C, Buf, Has_Read)) (1 .. Natural'Last - Length (B)));
+         pragma Assert (A = B & Append (C, Buf, Has_Read));
+      end Has_Read_Greater_Than_Length;
+   begin
+      if Has_Read = 0 then
+         Null_Has_Read;
+      elsif Length (B & C) = Natural'Last then
+         Append_B_C_Has_Max_Length;
+      elsif Natural (Has_Read) <= Natural'Last - Length (B & C) then
+         Has_Read_Less_Than_Length;
+      else
+         Has_Read_Greater_Than_Length;
+      end if;
+   end Substit_2;
+
 end Lemmas;
