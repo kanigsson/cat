@@ -1,5 +1,5 @@
 with Lemmas; use Lemmas;
-
+with Errors;
 procedure Full_Write
   (Fd        : Int;
    Buf       : Init_String;
@@ -41,7 +41,9 @@ begin
 
      Prove_Elements_Equal_Except (Contents, Contents_Old, Contents_Pcd_Entry, Fd);
 
-      if Has_Written_B <= -1 then
+      if Has_Written_B = -1 and then Errors.Get_Errno = Errors.ADA_EINTR then
+         Has_Written_B := 0;
+      elsif Has_Written_B = -1 then
          Err := -1;
          return;
       end if;

@@ -73,7 +73,9 @@ is
                 Proof_In => (FD_Table, Const_H.ADA_O_RDONLY, Const_H.ADa_O_RDWR)),
      Post =>
      (case Has_Read is
-        when -1                => Contents = Contents'Old,
+        when -1                =>
+          Contents = Contents'Old
+            and then (if Errors.Get_Errno = Errors.ADA_EINTR then Contains (Contents, Fd)),
         when 0                 =>
           Contents = Contents'Old
             and then Contains (Contents, Fd),
@@ -105,7 +107,9 @@ is
          and then Buf (Buf'First .. Buf'First - 1 + Natural (Num_Bytes))'Valid_scalars),
      Post =>
        (case Has_Written is
-          when -1                => Contents = Contents'Old,
+          when -1                =>
+            Contents = Contents'Old
+              and then (if Errors.Get_Errno = Errors.ADA_EINTR then Contains (Contents, Fd)),
           when 0                 =>
             Contents = Contents'Old
               and then Contains (Contents, Fd),

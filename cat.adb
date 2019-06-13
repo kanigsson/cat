@@ -78,10 +78,7 @@ is
                         = Append (Element (Contents_Old, INput).String,
                                   Buf,
                                   Has_Read));
-         if HAs_Read <= -1 then
-           Err := -1;
-           return;
-         elsif Has_Read = 0 then
+         if Has_Read = 0 then
             Equal_String (Element (Contents, Stdout).String,
                           Element (Contents_Old, Stdout).String,
                           Element (Contents_Pcd_Entry, Stdout).String,
@@ -91,6 +88,9 @@ is
                               Element (Contents_Old, Input).String,
                               Element (Contents, Input).String);
             exit;
+         elsif Has_Read = -1 then
+           Err := -1;
+           return;
          end if;
 
          Old_Stdout := Element (Contents, Stdout).String;
@@ -105,7 +105,7 @@ is
                            Model (Contents_Pcd_Entry),
                            Input,
                            Stdout));
-         if Err <= -1 then
+         if Err = -1 then
             return;
          end if;
          Equal_And_Append (Element (Contents, Stdout).String,
@@ -147,7 +147,7 @@ begin
             X := Stdin;
          else
             Open (To_C (Ada.Command_Line.Argument (I)), ADA_O_RDONLY, X);
-            if X <= -1 then
+            if X = -1 then
                case Errors.Get_Errno is
                when Errors.ADA_ENOENT =>
                   Ada.Text_IO.Put_Line ("file does not exist");

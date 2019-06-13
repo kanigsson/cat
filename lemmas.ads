@@ -134,6 +134,17 @@ is
        Fd                     : Int)
    is null;
 
+   procedure Equal_Maps_Implies_Elements_Equal_Except
+     (Contents, Contents_Old : Map;
+      Fd_1, Fd_2             : Int)
+   with
+     Pre  =>
+       Contents = Contents_Old,
+     Post => M.Elements_Equal_Except (Model (Contents), Model (Contents_Old), Fd_1, Fd_2);
+   procedure Equal_Maps_Implies_Elements_Equal_Except
+     (Contents, Contents_Old : Map;
+      Fd_1, Fd_2             : Int) is null;
+
    procedure Prove_Equality
      (Contents, Contents_Old, Contents_Pcd_Entry : Map;
       Buf                                        : Init_String;
