@@ -1,2 +1,0 @@
-* Rewrite contract of Write to take into account the case when Has_Written < Has_Read
-* Modify implementation and proof to make it prove

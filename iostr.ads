@@ -19,7 +19,10 @@ is
         Pre    => Source'Valid_Scalars,
         Post   =>
           To_String'Result'First = 1
-            and then To_String'Result'Last = Source'Length;
+            and then To_String'Result'Last = Source'Length
+            and then
+         (for all J in 1 .. Source'Length =>
+            Source (Source'First - 1 + J) = To_String'Result (J));
 
       type Unbounded_String is private with
         Default_Initial_Condition => Length (Unbounded_String) = 0;

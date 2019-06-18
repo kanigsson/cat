@@ -1,0 +1,51 @@
+diff --git share/spark/theories/_gnatprove_standard.mlw share/spark/theories/_gnatprove_standard.mlw
+index 38bb4ff1c..9c9f9ab5b 100644
+--- share/spark/theories/_gnatprove_standard.mlw
++++ share/spark/theories/_gnatprove_standard.mlw
+@@ -746,29 +746,40 @@ module Array__Index
+ end
+ 
+ module Array__1
+-  use map.Map
+   use bool.Bool
+ 
+   clone Array__Index as I1
+ 
+   type component_type
+ 
+-  type map = Map.map I1.t component_type
++  type map
+   type map__ref = { mutable map__content [@model_trace:] : map }
+   val map__havoc (x : map__ref) : unit
+      writes { x }
+ 
+-  function get [@inline] (a : map) (i : I1.t) : component_type = Map.get a i
+-  function set [@inline] (a : map) (i : I1.t) (v : component_type) : map = Map.set a i v
++  function get (a : map) (i : I1.t) : component_type
++  function set (a : map) (i : I1.t) (v : component_type) : map
+ 
+   val get (a : map) (i : I1.t) : component_type
+-    ensures { result = Map.get a i }
++   ensures { result = get a i }
+   val set (a : map) (i : I1.t) (v : component_type) : map
+-    ensures { result = Map.set a i v }
++    ensures { result = set a i v }
+ 
+   val function slide map I1.t I1.t : map
+   meta "encoding:lskept" function slide
+ 
++  axiom axiom_a :
++    forall a : map.
++    forall i : I1.t.
++    forall v : component_type [set a i v].
++      get (set a i v) i = v
++
++  axiom axiom_b :
++    forall a : map.
++    forall i, j : I1.t.
++    forall v : component_type [get a j, set a i v | get (set a i v) j].
++      i <> j -> get (set a i v) j = get a j
++
+   axiom slide_eq :
+     forall a : map.
+     forall first : I1.t

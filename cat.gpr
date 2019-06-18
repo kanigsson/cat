@@ -5,6 +5,10 @@ project Cat is
   for Main use ("cat.adb");
   for Exec_Dir use "bin";
 
+   package Prove is
+      for Proof_Dir use "proof";
+   end Prove;
+
   package Compiler is
       for Switches ("Ada") use ("-gnata", "-g");
   --      for Switches ("Ada") use ("-g");
