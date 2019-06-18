@@ -190,10 +190,12 @@ is
           or else
         Contents = Contents_Old)
           and then
-       M.Elements_Equal_Except
+       (M.Elements_Equal_Except
          (Model (Contents_Old),
           Model (Contents_Pcd_Entry),
-          Fd),
+          Fd)
+          or else
+        Contents_Old = Contents_Pcd_Entry),
       Post =>
         M.Elements_Equal_Except
           (Model (Contents),

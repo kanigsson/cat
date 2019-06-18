@@ -1,5 +1,6 @@
 with Lemmas; use Lemmas;
 with Errors;
+with Safe_Write;
 procedure Full_Write
   (Fd        : Int;
    Buf       : Init_String;
@@ -34,16 +35,14 @@ begin
          then Element (Contents_Old, Fd).String
             = Append (Element (Contents_Pcd_Entry, Fd).String, Buf, Has_Written));
 
-      Write (Fd,
+      Safe_Write (Fd,
              Buf (Buf'First + Integer (Has_Written) .. Buf'Last),
              Num_Bytes - Size_T (Has_Written),
              Has_Written_B);
 
      Prove_Elements_Equal_Except (Contents, Contents_Old, Contents_Pcd_Entry, Fd);
 
-      if Has_Written_B = -1 and then Errors.Get_Errno = Errors.ADA_EINTR then
-         Has_Written_B := 0;
-      elsif Has_Written_B = -1 then
+      if Has_Written_B = -1 then
          Err := -1;
          return;
       end if;
@@ -67,6 +66,11 @@ begin
       Has_Written := Has_Written + Has_Written_B;
 
       pragma Assert (Natural (Has_Written) <= Natural (Num_Bytes));
+      pragma Assert (Buf (Buf'First .. Buf'First - 1 + Natural (Num_bytes))'Valid_Scalars);
+      pragma Assert
+        (for all J in Buf'First .. Buf'First - 1 + Natural (Has_Written) =>
+           (J in Buf'First .. Buf'First - 1 + Natural (Num_Bytes)
+              and then Buf (J)'Valid_Scalars));
       pragma Assert (Buf (Buf'First .. Buf'First - 1 + Natural (Has_Written))'Valid_Scalars);
 
       pragma Loop_Invariant (M.Elements_Equal_Except

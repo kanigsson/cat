@@ -4,7 +4,8 @@ with Errors;
 with Const_H;             use Const_H;
 with Contents_Table_Type; use Contents_Table_Type;
 with Interfaces.C;        use Interfaces.C;
-with Iostr;               use Iostr;
+with Safe_Read;
+with Iostr; use Iostr;
 with Stdio;               use Stdio;
 with Lemmas; use LEmmas;
 with Full_Write;
@@ -65,7 +66,7 @@ is
                            = Element (Contents_Pcd_Entry, Stdout).String
                            & Element (Contents_Old, Input).String);
 
-         Read (Input, Buf, Has_Read);
+         Safe_Read (Input, Buf, Has_Read);
          pragma Assert (Element (Contents, Stdout).String
                         = Element (Contents_Old, Stdout).String);
          pragma Assert (M.Elements_Equal_Except
