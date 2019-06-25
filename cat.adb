@@ -9,6 +9,7 @@ with Iostr; use Iostr;
 with Stdio;               use Stdio;
 with Lemmas; use LEmmas;
 with Full_Write;
+with Perror;
 use Contents_Table_Type.Formal_Maps;
 use Contents_Table_Type. Formal_Maps.Formal_Model;
 use Iostr.Ghost_Package;
@@ -25,6 +26,10 @@ procedure Cat with
 is
    X : int;
    Err : int;
+   function Err_Message (Str : String) return String is
+     (case Str'Length is
+      when 0 .. Natural'Last - 5 => "cat: " & Str,
+      when others                => "cat: " & Str (Str'First .. Natural'Last - 6 + Str'First));
 
    procedure Copy_To_Stdout (Input : int; Err : out Int) with
      Global => (Proof_In => (FD_Table),
@@ -136,49 +141,35 @@ begin
    if Ada.Command_Line.Argument_Count = 0 then
       Copy_To_Stdout (Stdin, Err);
       if Err = -1 then
-         case Errors.Get_Errno is
-            when others =>
-               Ada.Text_IO.Put_Line ("unknown errors");
-         end case;
+         Perror ("cat: ");
       end if;
    else
       for I in 1 .. Ada.Command_Line.Argument_Count loop
-
          if Ada.Command_Line.Argument (I) = "-" then
             X := Stdin;
          else
             Open (To_C (Ada.Command_Line.Argument (I)), ADA_O_RDONLY, X);
             if X = -1 then
-               case Errors.Get_Errno is
-               when Errors.ADA_ENOENT =>
-                  Ada.Text_IO.Put_Line ("file does not exist");
-               when others =>
-                  Ada.Text_IO.Put_Line ("unknown errors");
-               end case;
-               return;
+               Perror (Err_Message (Ada.Command_Line.Argument (I)));
             end if;
          end if;
 
-         Copy_To_Stdout (X, Err);
-
-         if Err = -1 then
-            case Errors.Get_Errno is
-               when others =>
-                  Ada.Text_IO.Put_Line ("unknown errors");
-            end case;
-         end if;
-
-         if X /= Stdin then
-            Close (X, Err);
+         if X /= -1 then
+            Copy_To_Stdout (X, Err);
 
             if Err = -1 then
-               case Errors.Get_Errno is
-               when others =>
-                  Ada.Text_IO.Put_Line ("error when closing file");
-               end case;
+               Perror (Err_Message (Ada.Command_Line.Argument (I)));
             end if;
-         else
-         Reset (Stdin);
+
+            if X /= Stdin then
+               Close (X, Err);
+
+               if Err = -1 then
+                  Perror (Err_Message (Ada.Command_Line.Argument (I)));
+               end if;
+            else
+               Reset (Stdin);
+            end if;
          end if;
 
          pragma Assert (X /= Stdout);
