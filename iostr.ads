@@ -9,7 +9,7 @@ is
    subtype ssize_t is int;
 
    subtype Init_Char is Character;
-   pragma Annotate(GNATprove, Init_By_Proof, Init_Char);
+   pragma Annotate (GNATprove, Init_By_Proof, Init_Char);
 
    type Init_String is array (Positive range <>) of Init_Char;
 
@@ -56,11 +56,6 @@ is
           To_String'Result'First = 1
             and then To_String'Result'Last = Length (Source);
 
-      function Get (Source : Unbounded_String; J : Positive) return Character with
-        Global => null,
-        Pre    => J in 1 .. Length (Source),
-        Post   => Get'Result = To_String (Source) (J);
-
       function "=" (L, R : Unbounded_String) return Boolean with
         Global => null,
         Post   => "="'Result = (To_String (L) = To_String (R));
@@ -70,7 +65,8 @@ is
         Contract_Cases =>
           (Length (R) = 0
              or else
-           Length (L) = Natural'Last    => To_String ("&"'Result) = To_String (L),
+           Length (L) = Natural'Last    => To_String ("&"'Result)
+                                           = To_String (L),
            Length (R) > 0
              and then
            Length (R)
@@ -85,7 +81,7 @@ is
       function Append
         (L  : Unbounded_String;
          R : Init_String;
-         Bytes : Int)
+         Bytes : int)
       return     Unbounded_String
         with
           Global       => null,
@@ -94,11 +90,12 @@ is
             then
               Natural (Bytes) <= R'Length
                 and then
-              R (R'First.. R'First - 1 + Natural (Bytes))'Valid_Scalars),
+              R (R'First .. R'First - 1 + Natural (Bytes))'Valid_Scalars),
         Contract_Cases =>
           (Bytes <= 0
              or else
-           Length (L) = Natural'Last    => To_String (Append'Result) = To_String (L),
+           Length (L) = Natural'Last    => To_String (Append'Result)
+                                           = To_String (L),
            Bytes > 0
              and then
            Natural (Bytes)
@@ -107,13 +104,15 @@ is
                                            & To_String
                                                (R (R'First
                                                      ..
-                                                   R'First - 1 + Natural (Bytes))),
+                                                   R'First - 1
+                                                   + Natural (Bytes))),
            others                       => To_String (Append'Result)
                                            = To_String (L)
                                            & To_String
                                                (R (R'First
                                                      ..
-                                                   Natural'Last - Length (L) - 1 + R'First)));
+                                                   Natural'Last - Length (L)
+                                                   - 1 + R'First)));
 
    private
 
@@ -127,5 +126,5 @@ is
       function Null_Unbounded_String return Unbounded_String is
         (Unbounded_String'(Str => ASU.Null_Unbounded_String));
 
-      end Ghost_Package;
+   end Ghost_Package;
 end Iostr;

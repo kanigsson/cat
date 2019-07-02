@@ -1,4 +1,3 @@
-with Ada.Text_IO;
 package body Iostr with
   SPARK_Mode => Off
 is
@@ -12,9 +11,9 @@ is
         (ASU.To_String (Source.Str));
 
       function "=" (L, R : Unbounded_String) return Boolean is
-        use ASU;
+         use ASU;
       begin
-        return L.Str = R.Str;
+         return L.Str = R.Str;
       end "=";
 
       function "&" (L, R : Unbounded_String) return Unbounded_String is
@@ -30,15 +29,10 @@ is
          return Unbounded_String'(Str => Result);
       end "&";
 
-      function Get (Source : Unbounded_String; J : Positive) return Character is
-      begin
-        return ASU.Element (Source.Str, J);
-      end Get;
-
       function Append
         (L     : Unbounded_String;
          R     : Init_String;
-         Bytes : Int)
+         Bytes : int)
          return  Unbounded_String
       is
          Result : ASU.Unbounded_String := L.Str;
@@ -46,9 +40,15 @@ is
          if Length (L) = Natural'Last or else Bytes <= 0 then
             null;
          elsif Natural (Bytes) <= Natural'Last - Length (L) then
-            ASU.Append (Result, To_String (R (R'First .. R'First - 1 + Natural (Bytes))));
+            ASU.Append
+              (Result,
+               To_String (R (R'First .. R'First - 1 + Natural (Bytes))));
          else
-            ASU.Append (Result, To_String (R (R'First .. Natural'Last - Length (L) - 1 + R'First)));
+            ASU.Append
+              (Result,
+               To_String (R (R'First
+                              ..
+                             Natural'Last - Length (L) - 1 + R'First)));
          end if;
          return Unbounded_String'(Str => Result);
       end Append;

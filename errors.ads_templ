@@ -1,6 +1,11 @@
 #include <errno.h>
 with Interfaces.C; use Interfaces.C;
-package Errors is
+
+package Errors with
+  SPARK_Mode     => On,
+  Abstract_State => (Error_State),
+  Initializes    => (Error_State)
+is
    ADA_EPERM : constant Int := EPERM;
    ADA_ENOENT : constant Int := ENOENT;
    ADA_ESRCH : constant Int := ESRCH;
@@ -128,4 +133,6 @@ package Errors is
 
    function Get_Errno return int;
    pragma Import (C, Get_Errno, "__get_errno");
+
+   procedure P;
 end Errors;

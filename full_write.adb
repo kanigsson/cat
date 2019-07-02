@@ -1,19 +1,23 @@
-with Lemmas; use Lemmas;
-with Errors;
+with Ada.Containers; use Ada.Containers;
+with Lemmas;         use Lemmas;
+
 with Safe_Write;
 procedure Full_Write
-  (Fd        : Int;
+  (Fd        : int;
    Buf       : Init_String;
-   Num_Bytes : Size_T;
-   Err       : out Int)
+   Num_Bytes : size_t;
+   Err       : out int)
 with
   SPARK_Mode => On
 is
    Has_Written : ssize_t := 0;
    Has_Written_B : ssize_t;
-   Num_Bytes_S : ssize_t := Ssize_T (Num_Bytes);
-   Contents_Old : Map (1023, Default_Modulus (1023)) := Contents with Ghost;
-   Contents_Pcd_Entry : constant Map (1023, Default_Modulus (1023)) := Contents with Ghost;
+   Num_Bytes_S : ssize_t := ssize_t (Num_Bytes);
+   Contents_Old : Map (OPEN_MAX - 1, Default_Modulus (OPEN_MAX - 1)) :=
+     Contents with Ghost;
+   Contents_Pcd_Entry : constant Map (OPEN_MAX - 1,
+                                      Default_Modulus (OPEN_MAX - 1)) :=
+     Contents with Ghost;
 begin
    while Has_Written /= Num_Bytes_S loop
       Contents_Old := Contents;
@@ -25,7 +29,7 @@ begin
       pragma Assert (Buf (Buf'First + Integer (Has_Written)
                           ..
                           Buf'First + Integer (Has_Written) - 1
-                          + Natural (Num_Bytes - Size_T (Has_Written)))
+                          + Natural (Num_Bytes - size_t (Has_Written)))
                    = Buf (Buf'First + Integer (Has_Written)
                           ..
                           Buf'First - 1 + Natural (Num_Bytes)));
@@ -33,14 +37,19 @@ begin
       pragma Assert
         (if Contains (Contents, Fd)
          then Element (Contents_Old, Fd).String
-            = Append (Element (Contents_Pcd_Entry, Fd).String, Buf, Has_Written));
+            = Append (Element (Contents_Pcd_Entry, Fd).String,
+                      Buf,
+                      Has_Written));
 
       Safe_Write (Fd,
              Buf (Buf'First + Integer (Has_Written) .. Buf'Last),
-             Num_Bytes - Size_T (Has_Written),
+             Num_Bytes - size_t (Has_Written),
              Has_Written_B);
 
-     Prove_Elements_Equal_Except (Contents, Contents_Old, Contents_Pcd_Entry, Fd);
+      Prove_Elements_Equal_Except (Contents,
+                                   Contents_Old,
+                                   Contents_Pcd_Entry,
+                                   Fd);
 
       if Has_Written_B = -1 then
          Err := -1;
@@ -66,12 +75,16 @@ begin
       Has_Written := Has_Written + Has_Written_B;
 
       pragma Assert (Natural (Has_Written) <= Natural (Num_Bytes));
-      pragma Assert (Buf (Buf'First .. Buf'First - 1 + Natural (Num_bytes))'Valid_Scalars);
+      pragma Assert
+        (Buf (Buf'First .. Buf'First - 1 + Natural (Num_Bytes))'Valid_Scalars);
       pragma Assert
         (for all J in Buf'First .. Buf'First - 1 + Natural (Has_Written) =>
            (J in Buf'First .. Buf'First - 1 + Natural (Num_Bytes)
               and then Buf (J)'Valid_Scalars));
-      pragma Assert (Buf (Buf'First .. Buf'First - 1 + Natural (Has_Written))'Valid_Scalars);
+      pragma Assert
+        (Buf (Buf'First
+               ..
+              Buf'First - 1 + Natural (Has_Written))'Valid_Scalars);
 
       pragma Loop_Invariant (M.Elements_Equal_Except
                               (Model (Contents),

@@ -1,14 +1,14 @@
-with Iostr; use Iostr;
 with Contents_Table_Type; use Contents_Table_Type;
-with INterfaces.C; use Interfaces.C;
+with Interfaces.C;        use Interfaces.C;
+with Iostr;               use Iostr;
 
 package Lemmas with
   Ghost,
   SPARK_Mode => On
 is
    use Ghost_Package;
-   use FOrmal_Maps;
-   use FOrmal_Maps.Formal_Model;
+   use Formal_Maps;
+   use Formal_Maps.Formal_Model;
 
    procedure Equal_String
      (Str_1, Str_2, Left, Right : Unbounded_String)
@@ -26,12 +26,12 @@ is
    procedure Substit
      (A, B, C, D : Unbounded_String;
       Buf        : Init_String;
-      Has_Read   : Ssize_T)
+      Has_Read   : ssize_t)
    with
      Pre =>
        Has_Read in 0 .. Buf'Length
          and then
-       Buf (Buf'First.. Buf'First - 1 + Natural (Has_Read))'Valid_Scalars
+       Buf (Buf'First .. Buf'First - 1 + Natural (Has_Read))'Valid_Scalars
          and then
        A = Append (B, Buf, Has_Read)
          and then
@@ -41,12 +41,12 @@ is
    procedure Substit_2
      (A, B, C  : Unbounded_String;
       Buf      : Init_String;
-      Has_Read : Ssize_T)
+      Has_Read : ssize_t)
    with
      Pre =>
        Has_Read in 0 .. Buf'Length
          and then
-       Buf (Buf'First.. Buf'First - 1 + Natural (Has_Read))'Valid_Scalars
+       Buf (Buf'First .. Buf'First - 1 + Natural (Has_Read))'Valid_Scalars
          and then
        A = Append (B & C, Buf, Has_Read),
      Post => A = B & Append (C, Buf, Has_Read);
@@ -54,12 +54,12 @@ is
    procedure Substit_3
      (A, B, C, D : Unbounded_String;
       Buf        : Init_String;
-      Has_Read   : Ssize_T)
+      Has_Read   : ssize_t)
    with
      Pre =>
        Has_Read in 0 .. Buf'Length
          and then
-       Buf (Buf'First.. Buf'First - 1 + Natural (Has_Read))'Valid_Scalars
+       Buf (Buf'First .. Buf'First - 1 + Natural (Has_Read))'Valid_Scalars
          and then
        A = B & Append (C, Buf, Has_Read)
          and then
@@ -68,20 +68,20 @@ is
    procedure Substit_3
      (A, B, C, D : Unbounded_String;
       Buf        : Init_String;
-      Has_Read   : Ssize_T)
+      Has_Read   : ssize_t)
    is null;
 
    procedure Equal_And_Append
      (Str, Left_1, Left_2 : Unbounded_String;
       Buf                 : Init_String;
-      Bytes               : Int)
+      Bytes               : int)
    with
      Pre =>
        Bytes in 0 .. Buf'Length
          and then
        Left_1 = Left_2
          and then
-       Buf (Buf'First.. Buf'First - 1 + Natural (Bytes))'Valid_Scalars
+       Buf (Buf'First .. Buf'First - 1 + Natural (Bytes))'Valid_Scalars
          and then
        Str = Append (Left_1, Buf, Bytes),
      Post =>
@@ -103,13 +103,13 @@ is
    procedure Equal_Implies_Append_Zero
       (Str_1, Str_2               : Unbounded_String;
        Buf                        : Init_String;
-       Has_Written, Has_Written_B : Ssize_T)
+       Has_Written, Has_Written_B : ssize_t)
    with
      Pre =>
        Str_1 = Str_2
          and then Has_Written_B = 0
-         and then Integer (Has_Written) in 0 .. BUf'Length
-         and then Buf'Last < NAtural'Last,
+         and then Integer (Has_Written) in 0 .. Buf'Length
+         and then Buf'Last < Natural'Last,
      Post =>
        Str_1
        = Append (Str_2,
@@ -118,12 +118,12 @@ is
    procedure Equal_Implies_Append_Zero
       (Str_1, Str_2               : Unbounded_String;
        Buf                        : Init_String;
-       Has_Written, Has_Written_B : Ssize_T)
+       Has_Written, Has_Written_B : ssize_t)
    is null;
 
    procedure Equal_Maps_Implies_Equal_Elements
       (Contents, Contents_Old : Map;
-       Fd                     : Int)
+       Fd                     : int)
    with
      Pre =>
        Contents = Contents_Old
@@ -131,29 +131,33 @@ is
      Post => Element (Contents, Fd).String = Element (Contents_Old, Fd).String;
    procedure Equal_Maps_Implies_Equal_Elements
       (Contents, Contents_Old : Map;
-       Fd                     : Int)
+       Fd                     : int)
    is null;
 
    procedure Equal_Maps_Implies_Elements_Equal_Except
      (Contents, Contents_Old : Map;
-      Fd_1, Fd_2             : Int)
+      Fd_1, Fd_2             : int)
    with
      Pre  =>
        Contents = Contents_Old,
-     Post => M.Elements_Equal_Except (Model (Contents), Model (Contents_Old), Fd_1, Fd_2);
+     Post =>
+       M.Elements_Equal_Except (Model (Contents),
+                                Model (Contents_Old),
+                                Fd_1,
+                                Fd_2);
    procedure Equal_Maps_Implies_Elements_Equal_Except
      (Contents, Contents_Old : Map;
-      Fd_1, Fd_2             : Int) is null;
+      Fd_1, Fd_2             : int) is null;
 
    procedure Prove_Equality
      (Contents, Contents_Old, Contents_Pcd_Entry : Map;
       Buf                                        : Init_String;
       Has_Read                                   : ssize_t;
-      Input, Stdout                              : Int) with
+      Input, Stdout                              : int) with
    Pre  =>
      Has_Read in 0 .. Buf'Length
        and then
-     Buf (Buf'First.. Buf'First - 1 + Natural (Has_Read))'Valid_Scalars
+     Buf (Buf'First .. Buf'First - 1 + Natural (Has_Read))'Valid_Scalars
        and then
      Contains (Contents, Input)
        and then
@@ -161,7 +165,7 @@ is
        and then
      M.Same_Keys (Model (Contents), Model (Contents_Old))
        and then
-     M.Same_Keys (Model (Contents), MOdel (Contents_Pcd_Entry))
+     M.Same_Keys (Model (Contents), Model (Contents_Pcd_Entry))
        and then
      Element (Contents_Old, Stdout).String
      = Element (Contents_Pcd_Entry, Stdout).String
@@ -180,7 +184,7 @@ is
 
    procedure Prove_Elements_Equal_Except
      (Contents, Contents_Old, Contents_Pcd_Entry : Map;
-      Fd                                         : Int)
+      Fd                                         : int)
    with
      Pre =>
        (M.Elements_Equal_Except
@@ -203,21 +207,22 @@ is
            Fd);
    procedure Prove_Elements_Equal_Except
      (Contents, Contents_Old, Contents_Pcd_Entry : Map;
-      Fd                                         : Int)
+      Fd                                         : int)
    is null;
 
    procedure Prove_Loop_Invariant
      (Contents, Contents_Old, Contents_Pcd_Entry : Map;
       Buf                                        : Init_String;
       Has_Written, Has_Written_B, Num_Bytes_S    : ssize_t;
-      Fd                                         : Int) with
+      Fd                                         : int) with
      Pre =>
-       Num_Bytes_S in 1 .. Ssize_T (Integer'Last)
+       Num_Bytes_S in 1 .. ssize_t (Integer'Last)
          and then Integer (Num_Bytes_S) <= Buf'Length
          and then Buf'Last < Natural'Last
          and then Has_Written in 0 .. Num_Bytes_S
          and then Has_Written_B in 0 .. Num_Bytes_S - Has_Written
-         and then Buf (Buf'First .. Buf'First - 1 + Natural (Num_Bytes_S))'Valid_Scalars
+         and then
+       Buf (Buf'First .. Buf'First - 1 + Natural (Num_Bytes_S))'Valid_Scalars
          and then Contains (Contents, Fd)
          and then Contains (Contents_Old, Fd)
          and then Contains (Contents_Pcd_Entry, Fd)
@@ -231,20 +236,23 @@ is
                  Has_Written_B),
      Post =>
        Element (Contents, Fd).String
-         = Append (Element (Contents_Pcd_Entry, Fd).String, Buf, Has_Written + Has_Written_B);
+       = Append (Element (Contents_Pcd_Entry, Fd).String,
+                 Buf,
+                 Has_Written + Has_Written_B);
 
    procedure Prove_Loop_Invariant_String_Version
      (String, Old_String, Pcd_Entry_String    : Unbounded_String;
       Buf                                     : Init_String;
-      Has_Written, Has_Written_B, Num_Bytes_S : Ssize_T)
+      Has_Written, Has_Written_B, Num_Bytes_S : ssize_t)
    with
      Pre =>
-       Num_Bytes_S in 1 .. Ssize_T (Integer'Last)
+       Num_Bytes_S in 1 .. ssize_t (Integer'Last)
          and then Integer (Num_Bytes_S) <= Buf'Length
          and then Buf'Last < Natural'Last
          and then Has_Written in 0 .. Num_Bytes_S
          and then Has_Written_B in 0 .. Num_Bytes_S - Has_Written
-         and then Buf (Buf'First .. Buf'First - 1 + Natural (Num_Bytes_S))'Valid_Scalars
+         and then
+       Buf (Buf'First .. Buf'First - 1 + Natural (Num_Bytes_S))'Valid_Scalars
          and then
        Old_String
        = Append (Pcd_Entry_String, Buf, Has_Written)

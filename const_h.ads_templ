@@ -33,7 +33,7 @@ package Const_H is
    ADA_O_RDWR : constant Int := O_RDWR;
    ADA_O_WRONLY : constant Int := O_WRONLY;
    ADA_AT_FDCWD : constant Int := AT_FDCWD;
-   ADA_AT_EACCESS : constant Int := AT_EACCESS;
-   ADA_AT_SYMLINK_NOFOLLOW : constant Int := AT_SYMLINK_NOFOLLOW;
+--     ADA_AT_EACCESS : constant Int := AT_EACCESS;
+--     ADA_AT_SYMLINK_NOFOLLOW : constant Int := AT_SYMLINK_NOFOLLOW;
 end Const_H;
 

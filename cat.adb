@@ -1,15 +1,16 @@
-with Ada.Command_Line;
-with Ada.Text_IO;
-with Errors;
+with Ada.Containers;      use Ada.Containers;
 with Const_H;             use Const_H;
 with Contents_Table_Type; use Contents_Table_Type;
 with Interfaces.C;        use Interfaces.C;
-with Safe_Read;
-with Iostr; use Iostr;
+with Iostr;               use Iostr;
+with Lemmas;              use Lemmas;
 with Stdio;               use Stdio;
-with Lemmas; use LEmmas;
+with Ada.Command_Line;
+with Errors;
 with Full_Write;
 with Perror;
+with Safe_Read;
+
 use Contents_Table_Type.Formal_Maps;
 use Contents_Table_Type. Formal_Maps.Formal_Model;
 use Iostr.Ghost_Package;
@@ -29,9 +30,10 @@ is
    function Err_Message (Str : String) return String is
      (case Str'Length is
       when 0 .. Natural'Last - 5 => "cat: " & Str,
-      when others                => "cat: " & Str (Str'First .. Natural'Last - 6 + Str'First));
+      when others                =>
+        "cat: " & Str (Str'First .. Natural'Last - 6 + Str'First));
 
-   procedure Copy_To_Stdout (Input : int; Err : out Int) with
+   procedure Copy_To_Stdout (Input : int; Err : out int) with
      Global => (Proof_In => (FD_Table),
                 In_Out   => (Contents, Errors.Error_State)),
      Pre    =>
@@ -46,20 +48,27 @@ is
       (if Err = 0
        then
          Element (Contents, Stdout).String
-         = Element (Contents'Old, Stdout).String & Element (Contents, Input).String)
+         = Element (Contents'Old, Stdout).String
+         & Element (Contents, Input).String)
          and then
-       M.Elements_Equal_Except (Model (Contents), Model (Contents'Old), Input, Stdout);
+       M.Elements_Equal_Except (Model (Contents),
+                                Model (Contents'Old),
+                                Input,
+                                Stdout);
 
    procedure Copy_To_Stdout (Input : int; Err : out int) is
-      Contents_Pcd_Entry : constant Map (1023, Default_Modulus (1023)) := Contents with Ghost;
-      Contents_Old : Map (1023, Default_Modulus (1023)) := Contents with Ghost;
+      Contents_Pcd_Entry : constant Map (OPEN_MAX - 1,
+                                         Default_Modulus (OPEN_MAX - 1)) :=
+        Contents with Ghost;
+      Contents_Old : Map (OPEN_MAX - 1, Default_Modulus (OPEN_MAX - 1))  :=
+        Contents with Ghost;
       Old_Stdout, Old_Input : Unbounded_String with Ghost;
       Buf : Init_String (1 .. 1024);
       Has_Read : ssize_t;
    begin
       pragma Assert (M.Elements_Equal_Except
                       (Model (Contents),
-                       MOdel (Contents_Pcd_Entry),
+                       Model (Contents_Pcd_Entry),
                        Input,
                        Stdout));
       pragma Assert (Element (Contents_Old, Stdout).String
@@ -79,9 +88,10 @@ is
                           Model (Contents_Pcd_Entry),
                           Input,
                           Stdout));
-         pragma Assert (M.Same_Keys (MOdel (Contents_PCd_Entry),MOdel (Contents)));
+         pragma Assert (M.Same_Keys (Model (Contents_Pcd_Entry),
+                                     Model (Contents)));
          pragma Assert (Element (Contents, Input).String
-                        = Append (Element (Contents_Old, INput).String,
+                        = Append (Element (Contents_Old, Input).String,
                                   Buf,
                                   Has_Read));
          if Has_Read = 0 then
@@ -95,16 +105,16 @@ is
                               Element (Contents, Input).String);
             exit;
          elsif Has_Read = -1 then
-           Err := -1;
-           return;
+            Err := -1;
+            return;
          end if;
 
          Old_Stdout := Element (Contents, Stdout).String;
-           pragma Assert (Size_T (Has_Read) <= Buf'Length);
+         pragma Assert (size_t (Has_Read) <= Buf'Length);
          Full_Write
            (Stdout,
             Buf,
-            Size_T (Has_Read),
+            size_t (Has_Read),
             Err);
          pragma Assert (M.Elements_Equal_Except
                         (Model (Contents),
@@ -116,10 +126,16 @@ is
          end if;
          Equal_And_Append (Element (Contents, Stdout).String,
                            Old_Stdout,
-                           ELement (Contents_Old, Stdout).String,
+                           Element (Contents_Old, Stdout).String,
                            Buf,
                            Has_Read);
-         Prove_Equality (Contents, Contents_Old, Contents_Pcd_Entry, Buf, Has_Read, Input, Stdout);
+         Prove_Equality (Contents,
+                         Contents_Old,
+                         Contents_Pcd_Entry,
+                         Buf,
+                         Has_Read,
+                         Input,
+                         Stdout);
 
          pragma Loop_Invariant (M.Same_Keys
                                   (Model (Contents_Pcd_Entry),
@@ -132,9 +148,9 @@ is
          pragma Loop_Invariant (Element (Contents, Stdout).String
                                 = Element (Contents_Pcd_Entry, Stdout).String
                                 & Element (Contents, Input).String);
-     end loop;
+      end loop;
 
-     Err := 0;
+      Err := 0;
    end Copy_To_Stdout;
 
 begin
