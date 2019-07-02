@@ -179,21 +179,21 @@ is
       Input, Stdout                              : int)
    is
    begin
-      Substit (Element (Contents, Stdout).String,
-               Element (Contents_Old, Stdout).String,
-               Element (Contents_Pcd_Entry, Stdout).String,
-               Element (Contents_Old, Input).String,
+      Substit (Element (Contents, Stdout),
+               Element (Contents_Old, Stdout),
+               Element (Contents_Pcd_Entry, Stdout),
+               Element (Contents_Old, Input),
                Buf,
                Has_Read);
-      Substit_2 (Element (Contents, Stdout).String,
-                 Element (Contents_Pcd_Entry, Stdout).String,
-                 Element (Contents_Old, Input).String,
+      Substit_2 (Element (Contents, Stdout),
+                 Element (Contents_Pcd_Entry, Stdout),
+                 Element (Contents_Old, Input),
                  Buf,
                  Has_Read);
-      Substit_3 (Element (Contents, Stdout).String,
-                 Element (Contents_Pcd_Entry, Stdout).String,
-                 Element (Contents_Old, Input).String,
-                 Element (Contents, Input).String,
+      Substit_3 (Element (Contents, Stdout),
+                 Element (Contents_Pcd_Entry, Stdout),
+                 Element (Contents_Old, Input),
+                 Element (Contents, Input),
                  Buf,
                  Has_Read);
    end Prove_Equality;
@@ -206,9 +206,9 @@ is
    is
    begin
       Prove_Loop_Invariant_String_Version
-        (Element (Contents, Fd).String,
-         Element (Contents_Old, Fd).String,
-         Element (Contents_Pcd_Entry, Fd).String,
+        (Element (Contents, Fd),
+         Element (Contents_Old, Fd),
+         Element (Contents_Pcd_Entry, Fd),
          Buf,
          Has_Written,
          Has_Written_B,

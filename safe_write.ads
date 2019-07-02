@@ -37,8 +37,8 @@ with
            and then
          M.Same_Keys (Model (Contents), Model (Contents'Old))
            and then
-         Element (Contents, Fd).String
-         = Append (Element (Contents'Old, Fd).String, Buf, Has_Written)
+         Element (Contents, Fd)
+         = Append (Element (Contents'Old, Fd), Buf, Has_Written)
            and then
          M.Elements_Equal_Except (Model (Contents), Model (Contents'Old), Fd),
        when others            => False);

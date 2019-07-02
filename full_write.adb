@@ -36,8 +36,8 @@ begin
 
       pragma Assert
         (if Contains (Contents, Fd)
-         then Element (Contents_Old, Fd).String
-            = Append (Element (Contents_Pcd_Entry, Fd).String,
+         then Element (Contents_Old, Fd)
+            = Append (Element (Contents_Pcd_Entry, Fd),
                       Buf,
                       Has_Written));
 
@@ -60,8 +60,8 @@ begin
       if Has_Written_B = 0 then
          Equal_Maps_Implies_Equal_Elements (Contents, Contents_Old, Fd);
          Equal_Implies_Append_Zero
-           (Element (Contents, Fd).String,
-            Element (Contents_Old, Fd).String,
+           (Element (Contents, Fd),
+            Element (Contents_Old, Fd),
             Buf,
             Has_Written,
             Has_Written_B);
@@ -97,8 +97,8 @@ begin
                               (Model (Contents_Pcd_Entry),
                                Model (Contents)));
       pragma Loop_Invariant
-        (Element (Contents, Fd).String
-         = Append (Element (Contents_Pcd_Entry, Fd).String, Buf, Has_Written));
+        (Element (Contents, Fd)
+         = Append (Element (Contents_Pcd_Entry, Fd), Buf, Has_Written));
    end loop;
 
    Err := 0;

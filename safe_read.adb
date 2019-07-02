@@ -13,14 +13,14 @@ is
      Contents with Ghost;
    Fd_Content_Old : Unbounded_String :=
      (if Contains (Contents, Fd)
-      then Element (Contents, Fd).String
+      then Element (Contents, Fd)
       else Null_Unbounded_String) with Ghost;
 begin
    loop
       pragma Loop_Invariant (Contents = Contents_Pcd_Entry);
       Fd_Content_Old :=
         (if Contains (Contents, Fd)
-         then Element (Contents, Fd).String
+         then Element (Contents, Fd)
          else Null_Unbounded_String);
 
       Read (Fd, Buf, Has_Read);
@@ -30,9 +30,9 @@ begin
                                                  Model (Contents_Pcd_Entry),
                                                  Fd));
          Equal_And_Append
-            (Element (Contents, Fd).String,
+            (Element (Contents, Fd),
              Fd_Content_Old,
-             Element (Contents_Pcd_Entry, Fd).String,
+             Element (Contents_Pcd_Entry, Fd),
              Buf,
              Has_Read);
       end if;

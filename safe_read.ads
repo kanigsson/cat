@@ -30,8 +30,8 @@ procedure Safe_Read (Fd : int; Buf : out Init_String; Has_Read : out ssize_t)
             and then
           M.Same_Keys (Model (Contents), Model (Contents'Old))
             and then
-          Element (Contents, Fd).String
-          = Append (Element (Contents'Old, Fd).String, Buf, Has_Read)
+          Element (Contents, Fd)
+          = Append (Element (Contents'Old, Fd), Buf, Has_Read)
             and then
           M.Elements_Equal_Except (Model (Contents), Model (Contents'Old), Fd),
         when others          => False);

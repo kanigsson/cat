@@ -32,8 +32,8 @@ with
            and then
          M.Same_Keys (Model (Contents), Model (Contents'Old))
            and then
-         Element (Contents, Fd).String
-         = Append (Element (Contents'Old, Fd).String, Buf, ssize_t (Num_Bytes))
+         Element (Contents, Fd)
+         = Append (Element (Contents'Old, Fd), Buf, ssize_t (Num_Bytes))
            and then
          M.Elements_Equal_Except (Model (Contents), Model (Contents'Old), Fd),
        when others => False);

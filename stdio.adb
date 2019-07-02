@@ -24,7 +24,7 @@ is
    begin
       Fd := C_Open (File, Flags);
       if Fd >= 0 then
-         Insert (Contents, Fd, Null_Unbounded_String_Holder);
+         Insert (Contents, Fd, Null_Unbounded_String);
       end if;
    end Open;
 
@@ -42,10 +42,7 @@ is
       if Has_Read > 0 then
          Replace (Contents,
                   Fd,
-                  To_Unbounded_String_Holder (Append
-                                                (Element (Contents, Fd).String,
-                                                 Buf,
-                                                 Has_Read)));
+                  Append (Element (Contents, Fd), Buf, Has_Read));
       end if;
    end Read;
 
@@ -59,23 +56,20 @@ is
       if Has_Written > 0 then
          Replace (Contents,
                   Fd,
-                  To_Unbounded_String_Holder (Append
-                                                (Element (Contents, Fd).String,
-                                                 Buf,
-                                                 Has_Written)));
+                  Append (Element (Contents, Fd), Buf, Has_Written));
       end if;
    end Write;
 
    procedure Reset (Fd : int) is
    begin
       if Contains (Contents, Fd) then
-         Replace (Contents, Fd, Null_Unbounded_String_Holder);
+         Replace (Contents, Fd, Null_Unbounded_String);
          null;
       end if;
    end Reset;
 
 begin
-   Insert (Contents, Stdin,  Null_Unbounded_String_Holder);
-   Insert (Contents, Stdout, Null_Unbounded_String_Holder);
-   Insert (Contents, Stderr, Null_Unbounded_String_Holder);
+   Insert (Contents, Stdin,  Null_Unbounded_String);
+   Insert (Contents, Stdout, Null_Unbounded_String);
+   Insert (Contents, Stderr, Null_Unbounded_String);
 end Stdio;

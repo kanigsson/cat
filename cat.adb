@@ -21,12 +21,13 @@ procedure Cat with
     (Contains (Contents, Stdin)
        and then Contains (Contents, Stdout)
        and then Contains (Contents, Stderr)
-       and then Length (Element (Contents, Stdin).String) = 0
-       and then Length (Element (Contents, Stdout).String) = 0
-       and then Length (Element (Contents, Stderr).String) = 0)
+       and then Length (Element (Contents, Stdin)) = 0
+       and then Length (Element (Contents, Stdout)) = 0
+       and then Length (Element (Contents, Stderr)) = 0)
 is
    X : int;
    Err : int;
+
    function Err_Message (Str : String) return String is
      (case Str'Length is
       when 0 .. Natural'Last - 5 => "cat: " & Str,
@@ -38,23 +39,23 @@ is
                 In_Out   => (Contents, Errors.Error_State)),
      Pre    =>
        Contains (Contents, Stdout)
-         and then Input >= 0
          and then Contains (Contents, Input)
+         and then Input >= 0
          and then Input /= Stdout
-         and then Length (Element (Contents, Input).String) = 0,
+         and then Length (Element (Contents, Input)) = 0,
      Post =>
        M.Same_Keys (Model (Contents'Old), Model (Contents))
-         and then
-      (if Err = 0
-       then
-         Element (Contents, Stdout).String
-         = Element (Contents'Old, Stdout).String
-         & Element (Contents, Input).String)
          and then
        M.Elements_Equal_Except (Model (Contents),
                                 Model (Contents'Old),
                                 Input,
-                                Stdout);
+                                Stdout)
+         and then
+      (if Err = 0
+       then
+         Element (Contents, Stdout)
+         = Element (Contents'Old, Stdout)
+         & Element (Contents, Input));
 
    procedure Copy_To_Stdout (Input : int; Err : out int) is
       Contents_Pcd_Entry : constant Map (OPEN_MAX - 1,
@@ -71,18 +72,18 @@ is
                        Model (Contents_Pcd_Entry),
                        Input,
                        Stdout));
-      pragma Assert (Element (Contents_Old, Stdout).String
-                     = Element (Contents_Pcd_Entry, Stdout).String
-                     & Element (Contents_Old, Input).String);
+      pragma Assert (Element (Contents_Old, Stdout)
+                     = Element (Contents_Pcd_Entry, Stdout)
+                     & Element (Contents_Old, Input));
       loop
          Contents_Old := Contents;
-            pragma Assert (Element (Contents_Old, Stdout).String
-                           = Element (Contents_Pcd_Entry, Stdout).String
-                           & Element (Contents_Old, Input).String);
+            pragma Assert (Element (Contents_Old, Stdout)
+                           = Element (Contents_Pcd_Entry, Stdout)
+                           & Element (Contents_Old, Input));
 
          Safe_Read (Input, Buf, Has_Read);
-         pragma Assert (Element (Contents, Stdout).String
-                        = Element (Contents_Old, Stdout).String);
+         pragma Assert (Element (Contents, Stdout)
+                        = Element (Contents_Old, Stdout));
          pragma Assert (M.Elements_Equal_Except
                          (Model (Contents),
                           Model (Contents_Pcd_Entry),
@@ -90,26 +91,26 @@ is
                           Stdout));
          pragma Assert (M.Same_Keys (Model (Contents_Pcd_Entry),
                                      Model (Contents)));
-         pragma Assert (Element (Contents, Input).String
-                        = Append (Element (Contents_Old, Input).String,
+         pragma Assert (Element (Contents, Input)
+                        = Append (Element (Contents_Old, Input),
                                   Buf,
                                   Has_Read));
          if Has_Read = 0 then
-            Equal_String (Element (Contents, Stdout).String,
-                          Element (Contents_Old, Stdout).String,
-                          Element (Contents_Pcd_Entry, Stdout).String,
-                          Element (Contents_Old, Input).String);
-            Equal_And_Append (Element (Contents, Stdout).String,
-                              Element (Contents_Pcd_Entry, Stdout).String,
-                              Element (Contents_Old, Input).String,
-                              Element (Contents, Input).String);
+            Equal_String (Element (Contents, Stdout),
+                          Element (Contents_Old, Stdout),
+                          Element (Contents_Pcd_Entry, Stdout),
+                          Element (Contents_Old, Input));
+            Equal_And_Append (Element (Contents, Stdout),
+                              Element (Contents_Pcd_Entry, Stdout),
+                              Element (Contents_Old, Input),
+                              Element (Contents, Input));
             exit;
          elsif Has_Read = -1 then
             Err := -1;
             return;
          end if;
 
-         Old_Stdout := Element (Contents, Stdout).String;
+         Old_Stdout := Element (Contents, Stdout);
          pragma Assert (size_t (Has_Read) <= Buf'Length);
          Full_Write
            (Stdout,
@@ -124,9 +125,9 @@ is
          if Err = -1 then
             return;
          end if;
-         Equal_And_Append (Element (Contents, Stdout).String,
+         Equal_And_Append (Element (Contents, Stdout),
                            Old_Stdout,
-                           Element (Contents_Old, Stdout).String,
+                           Element (Contents_Old, Stdout),
                            Buf,
                            Has_Read);
          Prove_Equality (Contents,
@@ -145,9 +146,9 @@ is
                                    Model (Contents_Pcd_Entry),
                                    Stdout,
                                    Input));
-         pragma Loop_Invariant (Element (Contents, Stdout).String
-                                = Element (Contents_Pcd_Entry, Stdout).String
-                                & Element (Contents, Input).String);
+         pragma Loop_Invariant (Element (Contents, Stdout)
+                                = Element (Contents_Pcd_Entry, Stdout)
+                                & Element (Contents, Input));
       end loop;
 
       Err := 0;
@@ -192,7 +193,7 @@ begin
          pragma Assert (Contains (Contents, Stdout));
          pragma Loop_Invariant (Contains (Contents, Stdout));
          pragma Loop_Invariant (Contains (Contents, Stdin));
-         pragma Loop_Invariant (Length (Element (Contents, Stdin).String) = 0);
+         pragma Loop_Invariant (Length (Element (Contents, Stdin)) = 0);
       end loop;
    end if;
 end Cat;

@@ -128,7 +128,7 @@ is
      Pre =>
        Contents = Contents_Old
          and then Contains (Contents, Fd),
-     Post => Element (Contents, Fd).String = Element (Contents_Old, Fd).String;
+     Post => Element (Contents, Fd) = Element (Contents_Old, Fd);
    procedure Equal_Maps_Implies_Equal_Elements
       (Contents, Contents_Old : Map;
        Fd                     : int)
@@ -167,20 +167,20 @@ is
        and then
      M.Same_Keys (Model (Contents), Model (Contents_Pcd_Entry))
        and then
-     Element (Contents_Old, Stdout).String
-     = Element (Contents_Pcd_Entry, Stdout).String
-     & Element (Contents_Old, Input).String
+     Element (Contents_Old, Stdout)
+     = Element (Contents_Pcd_Entry, Stdout)
+     & Element (Contents_Old, Input)
        and then
-     Element (Contents, Stdout).String
-     = Append (Element (Contents_Old, Stdout).String, Buf, Has_Read)
+     Element (Contents, Stdout)
+     = Append (Element (Contents_Old, Stdout), Buf, Has_Read)
        and then
-     Element (Contents, Input).String
-     = Append (Element (Contents_Old, Input).String, Buf, Has_Read),
+     Element (Contents, Input)
+     = Append (Element (Contents_Old, Input), Buf, Has_Read),
 
      Post =>
-       Element (Contents, Stdout).String
-     = Element (Contents_Pcd_Entry, Stdout).String
-     & Element (Contents, Input).String;
+       Element (Contents, Stdout)
+     = Element (Contents_Pcd_Entry, Stdout)
+     & Element (Contents, Input);
 
    procedure Prove_Elements_Equal_Except
      (Contents, Contents_Old, Contents_Pcd_Entry : Map;
@@ -227,16 +227,16 @@ is
          and then Contains (Contents_Old, Fd)
          and then Contains (Contents_Pcd_Entry, Fd)
          and then
-       Element (Contents_Old, Fd).String
-       = Append (Element (Contents_Pcd_Entry, Fd).String, Buf, Has_Written)
+       Element (Contents_Old, Fd)
+       = Append (Element (Contents_Pcd_Entry, Fd), Buf, Has_Written)
          and then
-       Element (Contents, Fd).String
-       = Append (Element (Contents_Old, Fd).String,
+       Element (Contents, Fd)
+       = Append (Element (Contents_Old, Fd),
                  Buf (Buf'First + Integer (Has_Written) .. Buf'Last),
                  Has_Written_B),
      Post =>
-       Element (Contents, Fd).String
-       = Append (Element (Contents_Pcd_Entry, Fd).String,
+       Element (Contents, Fd)
+       = Append (Element (Contents_Pcd_Entry, Fd),
                  Buf,
                  Has_Written + Has_Written_B);
 

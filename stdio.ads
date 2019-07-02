@@ -13,9 +13,9 @@ package Stdio with
     (Contains (Contents, Stdin)
        and then Contains (Contents, Stdout)
        and then Contains (Contents, Stderr)
-       and then Length (Element (Contents, Stdin).String) = 0
-       and then Length (Element (Contents, Stdout).String) = 0
-       and then Length (Element (Contents, Stderr).String) = 0)
+       and then Length (Element (Contents, Stdin)) = 0
+       and then Length (Element (Contents, Stdout)) = 0
+       and then Length (Element (Contents, Stderr)) = 0)
 is
 
    pragma Elaborate_Body;
@@ -24,7 +24,7 @@ is
    use Formal_Maps;
    use Formal_Maps.Formal_Model;
 
-   OPEN_MAX : constant Count_Type := 10298495;
+   OPEN_MAX : constant Count_Type := 1024;
 
    Contents : Map (OPEN_MAX - 1, Default_Modulus (OPEN_MAX - 1)) with Ghost;
 
@@ -40,7 +40,7 @@ is
               and then
             Contains (Contents, Fd)
               and then
-            Length (Element (Contents, Fd).String) = 0
+            Length (Element (Contents, Fd)) = 0
               and then
             not Contains (Contents'Old, Fd)
               and then
@@ -88,8 +88,8 @@ is
             and then
           M.Same_Keys (Model (Contents), Model (Contents'Old))
             and then
-          Element (Contents, Fd).String
-          = Append (Element (Contents'Old, Fd).String, Buf, Has_Read)
+          Element (Contents, Fd)
+          = Append (Element (Contents'Old, Fd), Buf, Has_Read)
             and then
           M.Elements_Equal_Except (Model (Contents), Model (Contents'Old), Fd),
         when others          => False);
@@ -123,8 +123,8 @@ is
               and then
             M.Same_Keys (Model (Contents), Model (Contents'Old))
               and then
-            Element (Contents, Fd).String
-            = Append (Element (Contents'Old, Fd).String, Buf, Has_Written)
+            Element (Contents, Fd)
+            = Append (Element (Contents'Old, Fd), Buf, Has_Written)
               and then
             M.Elements_Equal_Except (Model (Contents),
                                      Model (Contents'Old),
@@ -142,7 +142,7 @@ is
             and then
           M.Elements_Equal_Except (Model (Contents), Model (Contents'Old), Fd)
             and then
-          Length (Element (Contents, Fd).String) = 0);
+          Length (Element (Contents, Fd)) = 0);
 
 
    Stdin  : constant int := 0;

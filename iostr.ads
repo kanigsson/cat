@@ -27,25 +27,9 @@ is
       type Unbounded_String is private with
         Default_Initial_Condition => Length (Unbounded_String) = 0;
 
-      type Unbounded_String_Holder is record
-        String : Unbounded_String;
-      end record;
-
       function Null_Unbounded_String return Unbounded_String with
         Global => null,
         Post   => Length (Null_Unbounded_String'Result) = 0;
-
-      function Null_Unbounded_String_Holder return Unbounded_String_Holder is
-        (Unbounded_String_Holder'(String => Null_Unbounded_String))
-      with
-        Global => null,
-        Post   => Length (Null_Unbounded_String_Holder'Result.String) = 0;
-
-      function To_Unbounded_String_Holder
-        (Source : Unbounded_String)
-         return   Unbounded_String_Holder
-      is
-        (Unbounded_String_Holder'(String => Source));
 
       function Length (Source : Unbounded_String) return Natural with
         Global => null;
