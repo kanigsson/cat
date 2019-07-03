@@ -47,21 +47,17 @@ is
       function "&" (L, R : Unbounded_String) return Unbounded_String with
         Global         => null,
         Contract_Cases =>
-          (Length (R) = 0
-             or else
-           Length (L) = Natural'Last    => To_String ("&"'Result)
-                                           = To_String (L),
-           Length (R) > 0
+          (Length (L) = Natural'Last    =>
+             To_String ("&"'Result) = To_String (L),
+           Length (L) < Natural'Last
              and then
            Length (R)
-           <= Natural'Last - Length (L) => To_String ("&"'Result)
-                                           = To_String (L) & To_String (R),
-           others                       => To_String ("&"'Result)
-                                           = To_String (L)
-                                           & To_String (R)
-                                               (1
-                                                 ..
-                                                Natural'Last - Length (L)));
+           <= Natural'Last - Length (L) =>
+             To_String ("&"'Result) = To_String (L) & To_String (R),
+           others                       =>
+             To_String ("&"'Result) = To_String (L)
+                                      & To_String (R)
+                                          (1 .. Natural'Last - Length (L)));
       function Append
         (L  : Unbounded_String;
          R : Init_String;
