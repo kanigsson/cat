@@ -1,13 +1,17 @@
-cat.exe: cat.adb errors.ads
+source_dir ?= ./src
+template_dir ?= ./src/types/templates
+types_dir ?= ./src/types
+
+cat: $(source_dir)/cat.adb
 	gprbuild -p -P cat
 
-errors.ads: errors.ads_templ
-	cpp -P $^ | tail -n +3 > $@
+errors.ads: $(template_dir)/errors.ads_templ
+	cpp -P $^ | tail -n +3 > $(types_dir)/$@
 
-const_h.ads: const_h.ads_templ
-	cpp -P $^ | tail -n +102 > $@
+const_h.ads: $(template_dir)/const_h.ads_templ
+	cpp -P $^ | tail -n +102 > $(types_dir)/$@
 
 .PHONY: proof
 
 proof:
-	gnatprove -P cat --no-counterexample --no-inlining -j 16 --level=4
+	gnatprove -P cat --no-counterexample --no-inlining -j 16 --replay

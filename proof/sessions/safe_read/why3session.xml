@@ -280,14 +280,14 @@
   </goal>
   <goal name="VC def.73" expl="postcondition" proved="true">
   <proof prover="0" steplimit="122074"><result status="valid" steps="110976"/></proof>
-  <proof prover="1" timelimit="5" steplimit="0" memlimit="1000" obsolete="true"><result status="unknown" steps="4352"/></proof>
+  <proof prover="1" timelimit="5" steplimit="0" memlimit="1000" obsolete="true"><result status="unknown" steps="4198"/></proof>
   </goal>
   <goal name="VC def.74" expl="postcondition" proved="true">
   <proof prover="1"><result status="valid" steps="5"/></proof>
   </goal>
   <goal name="VC def.75" expl="postcondition" proved="true">
   <proof prover="0"><result status="valid" steps="116326"/></proof>
-  <proof prover="1" timelimit="5" steplimit="0" memlimit="1000" obsolete="true"><result status="unknown" steps="4189"/></proof>
+  <proof prover="1" timelimit="5" steplimit="0" memlimit="1000" obsolete="true"><result status="unknown" steps="4343"/></proof>
   </goal>
   <goal name="VC def.76" expl="postcondition" proved="true">
   <proof prover="1"><result status="valid" steps="5"/></proof>

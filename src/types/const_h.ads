@@ -1,7 +1,5 @@
 with Interfaces.C; use Interfaces.C;
-package Const_H with
-  SPARK_Mode
-is
+package Const_H is
    ADA_F_DUPFD : constant int := 0;
    ADA_F_DUPFD_CLOEXEC : constant int := 1030;
    ADA_F_GETFD : constant int := 1;
@@ -34,6 +32,4 @@ is
    ADA_O_RDWR : constant int := 02;
    ADA_O_WRONLY : constant int := 01;
    ADA_AT_FDCWD : constant int := -100;
---     ADA_AT_EACCESS : constant Int := 0x200;
---     ADA_AT_SYMLINK_NOFOLLOW : constant Int := 0x100;
 end Const_H;

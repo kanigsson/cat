@@ -1,11 +1,10 @@
+
 with Interfaces.C; use Interfaces.C;
-
 package Errors with
-  SPARK_Mode     => On,
+  SPARK_Mode => On,
   Abstract_State => (Error_State),
-  Initializes    => (Error_State)
+  Initializes => (Error_State)
 is
-
    ADA_EPERM : constant int := 1;
    ADA_ENOENT : constant int := 2;
    ADA_ESRCH : constant int := 3;
@@ -130,9 +129,7 @@ is
    ADA_EDQUOT : constant int := 122;
    ADA_ENOMEDIUM : constant int := 123;
    ADA_EMEDIUMTYPE : constant int := 124;
-   function Get_Errno return int
-   with Global => (Error_State);
+   function Get_Errno return int with Global => Error_State;
    pragma Import (C, Get_Errno, "__get_errno");
-
    procedure P;
 end Errors;
