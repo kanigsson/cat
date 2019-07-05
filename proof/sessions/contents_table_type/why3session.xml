@@ -2,7 +2,7 @@
 <!DOCTYPE why3session PUBLIC "-//Why3//proof session v5//EN"
 "http://why3.lri.fr/why3session.dtd">
 <why3session shape_version="6">
-<prover id="0" name="CVC4" version="1.6-gnatprove" timelimit="0" steplimit="6" memlimit="0"/>
+<prover id="0" name="CVC4" version="1.6-gnatprove" timelimit="5" steplimit="0" memlimit="1000"/>
 <file proved="true">
 <path name=".."/>
 <path name=".."/>
@@ -509,7 +509,7 @@
   <proof prover="0"><result status="valid" steps="5"/></proof>
   </goal>
   <goal name="VC def.5" expl="precondition" proved="true">
-  <proof prover="0" steplimit="21"><result status="valid" steps="19"/></proof>
+  <proof prover="0"><result status="valid" steps="19"/></proof>
   </goal>
   <goal name="VC def.6" expl="precondition" proved="true">
   <proof prover="0"><result status="valid" steps="5"/></proof>
@@ -1772,15 +1772,15 @@
   </transf>
   </goal>
   <goal name="VC def.2" expl="precondition" proved="true">
-  <proof prover="0"><result status="valid" steps="5"/></proof>
+  <transf name="trivial_true" proved="true" >
+  </transf>
   </goal>
   <goal name="VC def.3" expl="postcondition" proved="true">
   <transf name="trivial_true" proved="true" >
   </transf>
   </goal>
   <goal name="VC def.4" expl="precondition" proved="true">
-  <transf name="trivial_true" proved="true" >
-  </transf>
+  <proof prover="0"><result status="valid" steps="5"/></proof>
   </goal>
   <goal name="VC def.5" expl="postcondition" proved="true">
   <transf name="trivial_true" proved="true" >
@@ -1794,11 +1794,11 @@
   <transf name="trivial_true" proved="true" >
   </transf>
   </goal>
-  <goal name="VC def.8" expl="postcondition" proved="true">
+  <goal name="VC def.8" expl="precondition" proved="true">
   <transf name="trivial_true" proved="true" >
   </transf>
   </goal>
-  <goal name="VC def.9" expl="precondition" proved="true">
+  <goal name="VC def.9" expl="postcondition" proved="true">
   <transf name="trivial_true" proved="true" >
   </transf>
   </goal>
@@ -1806,11 +1806,11 @@
   <transf name="trivial_true" proved="true" >
   </transf>
   </goal>
-  <goal name="VC def.11" expl="postcondition" proved="true">
+  <goal name="VC def.11" expl="precondition" proved="true">
   <transf name="trivial_true" proved="true" >
   </transf>
   </goal>
-  <goal name="VC def.12" expl="precondition" proved="true">
+  <goal name="VC def.12" expl="postcondition" proved="true">
   <transf name="trivial_true" proved="true" >
   </transf>
   </goal>
@@ -1819,15 +1819,15 @@
   </transf>
   </goal>
   <goal name="VC def.14" expl="precondition" proved="true">
-  <proof prover="0"><result status="valid" steps="5"/></proof>
+  <transf name="trivial_true" proved="true" >
+  </transf>
   </goal>
   <goal name="VC def.15" expl="postcondition" proved="true">
   <transf name="trivial_true" proved="true" >
   </transf>
   </goal>
   <goal name="VC def.16" expl="precondition" proved="true">
-  <transf name="trivial_true" proved="true" >
-  </transf>
+  <proof prover="0"><result status="valid" steps="5"/></proof>
   </goal>
   <goal name="VC def.17" expl="postcondition" proved="true">
   <transf name="trivial_true" proved="true" >
@@ -1919,7 +1919,7 @@
   </transf>
   </goal>
   <goal name="VC def.4" expl="precondition" proved="true">
-  <proof prover="0" steplimit="16"><result status="valid" steps="14"/></proof>
+  <proof prover="0"><result status="valid" steps="14"/></proof>
   </goal>
   <goal name="VC def.5" expl="postcondition" proved="true">
   <transf name="trivial_true" proved="true" >

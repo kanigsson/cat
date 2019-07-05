@@ -1,0 +1,35 @@
+* I/O experiment with SPARK
+
+This project is an experiment about a low-level I/O library in
+SPARK. The goal was to prove some properties about the ~cat~
+program.
+
+** The library
+
+The library specification is in ~src/stdio/stdio.ads~. We model the
+file descriptor table with a map that links each file descriptor to
+the content of the corresponding file. The contracts on system calls
+are complete with regard to the functional model.
+
+** Cat
+
+The ~cat~ program has been rewritten in SPARK (a very simple version,
+it is not possible to pass options to this ~cat~) and formally
+proved with GNATprove.
+
+** Verification
+
+The verification is only possible with a patched version of SPARK. The
+patch is available at the root of the project. You can patch your
+SPARK install and run the command ~make install-all~ to have the right
+version of SPARK.
+Also, the ~--replay~ option on GNATprove might not work correctly on
+this project. You can run the replay and run GNATprove again with
+~--level=4~ and ~--timeout=250~ at least to make it prove entirely.
+
+** Content of each directory
+
+- ~src~ directory contains all source files.
+- ~proof/sessions~ contains the session files.
+- ~testsuite~ contains a very small testsuite, that might need to be
+  enriched with more tests.

@@ -1,5 +1,6 @@
 
 with Interfaces.C; use Interfaces.C;
+--  This package defines the different error codes.
 package Errors with
   SPARK_Mode => On,
   Abstract_State => (Error_State),
@@ -131,5 +132,7 @@ is
    ADA_EMEDIUMTYPE : constant int := 124;
    function Get_Errno return int with Global => Error_State;
    pragma Import (C, Get_Errno, "__get_errno");
+   --  Procedure P has no use but it is necessary to write a body to Errors
+   --  to define the abstract state.
    procedure P;
 end Errors;

@@ -2,6 +2,11 @@ with Contents_Table_Type; use Contents_Table_Type;
 with Interfaces.C;        use Interfaces.C;
 with Iostr;               use Iostr;
 
+--  In this package, the comment "Prove preconditions" is often present in
+--  preconditions of a procedure. This means that the preconditions above
+--  the comment are used to prove checks (preconditions, range checks)
+--  on the precondition lines below it.
+
 package Lemmas with
   Ghost,
   SPARK_Mode => On
@@ -10,7 +15,8 @@ is
    use Formal_Maps;
    use Formal_Maps.Formal_Model;
 
-   procedure Equal_String
+   --  If Str_1 = Str_2 and Str_2 = Left & Right, then Str_1 = Left & Right
+   procedure Equality_Transitivity
      (Str_1, Str_2, Left, Right : Unbounded_String)
    with
      Pre =>
@@ -18,60 +24,12 @@ is
          and then
        Str_2 = Left & Right,
      Post => Str_1 = Left & Right;
-
-   procedure Equal_String
+   procedure Equality_Transitivity
      (Str_1, Str_2, Left, Right : Unbounded_String)
    is null;
 
-   procedure Substit
-     (A, B, C, D : Unbounded_String;
-      Buf        : Init_String;
-      Has_Read   : ssize_t)
-   with
-     Pre =>
-       Has_Read in 0 .. Buf'Length
-         and then
-       Buf (Buf'First .. Buf'First - 1 + Natural (Has_Read))'Valid_Scalars
-         and then
-       A = Append (B, Buf, Has_Read)
-         and then
-       B = C & D,
-     Post => A = Append (C & D, Buf, Has_Read);
-
-   procedure Substit_2
-     (A, B, C  : Unbounded_String;
-      Buf      : Init_String;
-      Has_Read : ssize_t)
-   with
-     Pre =>
-       Has_Read in 0 .. Buf'Length
-         and then
-       Buf (Buf'First .. Buf'First - 1 + Natural (Has_Read))'Valid_Scalars
-         and then
-       A = Append (B & C, Buf, Has_Read),
-     Post => A = B & Append (C, Buf, Has_Read);
-
-   procedure Substit_3
-     (A, B, C, D : Unbounded_String;
-      Buf        : Init_String;
-      Has_Read   : ssize_t)
-   with
-     Pre =>
-       Has_Read in 0 .. Buf'Length
-         and then
-       Buf (Buf'First .. Buf'First - 1 + Natural (Has_Read))'Valid_Scalars
-         and then
-       A = B & Append (C, Buf, Has_Read)
-         and then
-       Append (C, Buf, Has_Read) = D,
-     Post => A = B & D;
-   procedure Substit_3
-     (A, B, C, D : Unbounded_String;
-      Buf        : Init_String;
-      Has_Read   : ssize_t)
-   is null;
-
-   procedure Equal_And_Append
+   --  It is possible to substitute the left argument in call to Append.
+   procedure Left_Substitution_In_Concat
      (Str, Left_1, Left_2 : Unbounded_String;
       Buf                 : Init_String;
       Bytes               : int)
@@ -79,16 +37,18 @@ is
      Pre =>
        Bytes in 0 .. Buf'Length
          and then
-       Left_1 = Left_2
-         and then
        Buf (Buf'First .. Buf'First - 1 + Natural (Bytes))'Valid_Scalars
+       --  Prove preconditions
+
+         and then
+       Left_1 = Left_2
          and then
        Str = Append (Left_1, Buf, Bytes),
      Post =>
        Str = Append (Left_2, Buf, Bytes);
 
-
-   procedure Equal_And_Append
+   --  It is possible to substitute the right argument in call to "&".
+   procedure Right_Substitution_In_Concat
      (Str, Left, Right_1, Right_2 : Unbounded_String)
    with
      Pre  =>
@@ -96,60 +56,13 @@ is
          and then
        Str = Left & Right_1,
      Post => Str = Left & Right_2;
-   procedure Equal_And_Append
+   procedure Right_Substitution_In_Concat
       (Str, Left, Right_1, Right_2 : Unbounded_String)
    is null;
 
-   procedure Equal_Implies_Append_Zero
-      (Str_1, Str_2               : Unbounded_String;
-       Buf                        : Init_String;
-       Has_Written, Has_Written_B : ssize_t)
-   with
-     Pre =>
-       Str_1 = Str_2
-         and then Has_Written_B = 0
-         and then Integer (Has_Written) in 0 .. Buf'Length
-         and then Buf'Last < Natural'Last,
-     Post =>
-       Str_1
-       = Append (Str_2,
-                 Buf (Buf'First + Integer (Has_Written) .. Buf'Last),
-                 Has_Written_B);
-   procedure Equal_Implies_Append_Zero
-      (Str_1, Str_2               : Unbounded_String;
-       Buf                        : Init_String;
-       Has_Written, Has_Written_B : ssize_t)
-   is null;
-
-   procedure Equal_Maps_Implies_Equal_Elements
-      (Contents, Contents_Old : Map;
-       Fd                     : int)
-   with
-     Pre =>
-       Contents = Contents_Old
-         and then Contains (Contents, Fd),
-     Post => Element (Contents, Fd) = Element (Contents_Old, Fd);
-   procedure Equal_Maps_Implies_Equal_Elements
-      (Contents, Contents_Old : Map;
-       Fd                     : int)
-   is null;
-
-   procedure Equal_Maps_Implies_Elements_Equal_Except
-     (Contents, Contents_Old : Map;
-      Fd_1, Fd_2             : int)
-   with
-     Pre  =>
-       Contents = Contents_Old,
-     Post =>
-       M.Elements_Equal_Except (Model (Contents),
-                                Model (Contents_Old),
-                                Fd_1,
-                                Fd_2);
-   procedure Equal_Maps_Implies_Elements_Equal_Except
-     (Contents, Contents_Old : Map;
-      Fd_1, Fd_2             : int) is null;
-
-   procedure Prove_Equality
+   --  This procedure helps proving a loop invariant in Copy_To_Stdout
+   --  (in src/cat.adb)
+   procedure Prove_Copy_To_Stdout_LI
      (Contents, Contents_Old, Contents_Pcd_Entry : Map;
       Buf                                        : Init_String;
       Has_Read                                   : ssize_t;
@@ -166,6 +79,8 @@ is
      M.Same_Keys (Model (Contents), Model (Contents_Old))
        and then
      M.Same_Keys (Model (Contents), Model (Contents_Pcd_Entry))
+     --  Prove preconditions
+
        and then
      Element (Contents_Old, Stdout)
      = Element (Contents_Pcd_Entry, Stdout)
@@ -182,35 +97,9 @@ is
      = Element (Contents_Pcd_Entry, Stdout)
      & Element (Contents, Input);
 
-   procedure Prove_Elements_Equal_Except
-     (Contents, Contents_Old, Contents_Pcd_Entry : Map;
-      Fd                                         : int)
-   with
-     Pre =>
-       (M.Elements_Equal_Except
-         (Model (Contents),
-          Model (Contents_Old),
-          Fd)
-          or else
-        Contents = Contents_Old)
-          and then
-       (M.Elements_Equal_Except
-         (Model (Contents_Old),
-          Model (Contents_Pcd_Entry),
-          Fd)
-          or else
-        Contents_Old = Contents_Pcd_Entry),
-      Post =>
-        M.Elements_Equal_Except
-          (Model (Contents),
-           Model (Contents_Pcd_Entry),
-           Fd);
-   procedure Prove_Elements_Equal_Except
-     (Contents, Contents_Old, Contents_Pcd_Entry : Map;
-      Fd                                         : int)
-   is null;
-
-   procedure Prove_Loop_Invariant
+   --  This procedure helps proving a loop invariant in Full_Write
+   --  (in src/lib/full_write.adb)
+   procedure Prove_Full_Write_LI
      (Contents, Contents_Old, Contents_Pcd_Entry : Map;
       Buf                                        : Init_String;
       Has_Written, Has_Written_B, Num_Bytes_S    : ssize_t;
@@ -226,6 +115,8 @@ is
          and then Contains (Contents, Fd)
          and then Contains (Contents_Old, Fd)
          and then Contains (Contents_Pcd_Entry, Fd)
+         --  Prove preconditions
+
          and then
        Element (Contents_Old, Fd)
        = Append (Element (Contents_Pcd_Entry, Fd), Buf, Has_Written)
@@ -239,29 +130,5 @@ is
        = Append (Element (Contents_Pcd_Entry, Fd),
                  Buf,
                  Has_Written + Has_Written_B);
-
-   procedure Prove_Loop_Invariant_String_Version
-     (String, Old_String, Pcd_Entry_String    : Unbounded_String;
-      Buf                                     : Init_String;
-      Has_Written, Has_Written_B, Num_Bytes_S : ssize_t)
-   with
-     Pre =>
-       Num_Bytes_S in 1 .. ssize_t (Integer'Last)
-         and then Integer (Num_Bytes_S) <= Buf'Length
-         and then Buf'Last < Natural'Last
-         and then Has_Written in 0 .. Num_Bytes_S
-         and then Has_Written_B in 0 .. Num_Bytes_S - Has_Written
-         and then
-       Buf (Buf'First .. Buf'First - 1 + Natural (Num_Bytes_S))'Valid_Scalars
-         and then
-       Old_String
-       = Append (Pcd_Entry_String, Buf, Has_Written)
-         and then
-       String
-       = Append (Old_String,
-                 Buf (Buf'First + Integer (Has_Written) .. Buf'Last),
-                 Has_Written_B),
-     Post =>
-       String = Append (Pcd_Entry_String, Buf, Has_Written + Has_Written_B);
 
 end Lemmas;

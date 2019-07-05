@@ -1,4 +1,5 @@
 with Interfaces.C; use Interfaces.C;
+--  This package contains the file control options.
 package Const_H is
    ADA_F_DUPFD : constant int := 0;
    ADA_F_DUPFD_CLOEXEC : constant int := 1030;
