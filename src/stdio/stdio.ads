@@ -85,7 +85,7 @@ is
             and then
           Same_Keys (Contents, Contents'Old)
             and then
-        Is_Append (Get (Contents'Old, Fd), One_String (Buf),
+        Is_Append (Get (Contents'Old, Fd), Buf,
                    Get (Contents, Fd), Has_Read)
             and then
           Elements_Equal_Except (Contents, Contents'Old, Fd),
@@ -121,7 +121,7 @@ is
             Same_Keys (Contents, Contents'Old)
               and then
           Is_Append (Get (Contents'Old, Fd),
-                     One_String (Buf),
+                     Buf,
                      Get (Contents, Fd),
                        Has_Written)
               and then

@@ -85,7 +85,7 @@ is
                           Stdout));
          pragma Assert (Same_Keys (Contents_Pcd_Entry,
                                      Contents));
-         pragma Assert (Is_Append (Get (Contents_Old, Input), String (Buf),
+         pragma Assert (Is_Append (Get (Contents_Old, Input), Buf,
                         Get (Contents, Input), Has_Read));
          if Has_Read = 0 then
             exit;
@@ -94,36 +94,32 @@ is
             return;
          end if;
 
-         declare
-            Old_Stdout : One_String := Get (Contents, Stdout) with Ghost;
-         begin
-            pragma Assert (size_t (Has_Read) <= Buf'Length);
-            Full_Write
-              (Stdout,
-               Buf,
-               size_t (Has_Read),
-               Err);
-            pragma Assert (Elements_Equal_Except
-                           (Contents,
-                              Contents_Pcd_Entry,
-                              Input,
-                              Stdout));
-            if Err = -1 then
-               return;
-            end if;
+         pragma Assert (size_t (Has_Read) <= Buf'Length);
+         Full_Write
+           (Stdout,
+            Buf,
+            size_t (Has_Read),
+            Err);
+         pragma Assert (Elements_Equal_Except
+                        (Contents,
+                           Contents_Pcd_Entry,
+                           Input,
+                           Stdout));
+         if Err = -1 then
+            return;
+         end if;
 
-            pragma Loop_Invariant (Same_Keys
-                                   (Contents_Pcd_Entry,
-                                      Contents));
-            pragma Loop_Invariant (Elements_Equal_Except
-                                   (Contents,
-                                      Contents_Pcd_Entry,
-                                      Stdout,
-                                      Input));
-            pragma Loop_Invariant (Get (Contents, Stdout)
-                                   = Get (Contents_Pcd_Entry, Stdout)
-                                   & Get (Contents, Input));
-         end;
+         pragma Loop_Invariant (Same_Keys
+                                (Contents_Pcd_Entry,
+                                   Contents));
+         pragma Loop_Invariant (Elements_Equal_Except
+                                (Contents,
+                                   Contents_Pcd_Entry,
+                                   Stdout,
+                                   Input));
+         pragma Loop_Invariant (Get (Contents, Stdout)
+                                = Get (Contents_Pcd_Entry, Stdout)
+                                & Get (Contents, Input));
       end loop;
 
       Err := 0;

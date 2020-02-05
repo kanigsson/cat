@@ -35,7 +35,7 @@ with
            and then
          Same_Keys (Contents, Contents'Old)
            and then
-       Is_Append (Get (Contents'Old, Fd), One_String (Buf), Get (Contents, Fd),
+       Is_Append (Get (Contents'Old, Fd), Buf, Get (Contents, Fd),
                   Has_Written)
            and then
          Elements_Equal_Except (Contents, Contents'Old, Fd),

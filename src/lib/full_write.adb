@@ -36,7 +36,7 @@ begin
         (if Has_Key (Contents, Fd)
          then
            Is_Append (Get (Contents_Pcd_Entry, Fd),
-                      One_String (Buf),
+                      Buf,
                       Get (Contents_Old, Fd),
                       Has_Written));
 
@@ -76,7 +76,7 @@ begin
                               (Contents_Pcd_Entry,
                                Contents));
       pragma Loop_Invariant
-        (Is_Append (Get (Contents_Pcd_Entry, Fd), One_String (Buf),
+        (Is_Append (Get (Contents_Pcd_Entry, Fd), Buf,
                     Get (Contents, Fd), Has_Written));
    end loop;
 

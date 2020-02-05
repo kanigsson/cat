@@ -36,12 +36,16 @@ is
         (for all I in C'Range =>
               C (I) = (if I <= A'Length then A (I) else B (I - A'Length))));
 
-   function Is_Append (A, B, C : One_String; Bytes : int) return Boolean is
+   function Is_Append (A : One_String; B : Init_String; C : One_String;
+                       Bytes : int) return Boolean is
      (C'Length = (if Integer'Last - Integer (Bytes) < A'Length then A'Length
                   else A'Length + Bytes)
       and then
         (for all I in C'Range =>
-              C (I) = (if I <= A'Length then A (I) else B (I - A'Length))))
-   with Pre => 0 <= Bytes and then Bytes <= B'Length;
+              C (I) = (if I <= A'Length then A (I)
+                       else B (B'First - 1 + (I - A'Length)))))
+       with Pre => 0 <= Bytes and then Bytes <= B'Length
+                   and then B (B'First ..
+                               B'First - 1 + Natural (Bytes))'Valid_Scalars;
 
 end Iostr;

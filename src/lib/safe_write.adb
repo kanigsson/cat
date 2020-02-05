@@ -21,9 +21,6 @@ begin
            (Buf (Buf'First
                   ..
                  Buf'First - 1 + Natural (Has_Written))'Valid_Scalars);
-         pragma Assert (Elements_Equal_Except (Contents,
-                                               Contents_Pcd_Entry,
-                                               Fd));
       end if;
 
       exit when (Has_Written < 0 and then Errors.Get_Errno /= Errors.ADA_EINTR)

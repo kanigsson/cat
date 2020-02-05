@@ -28,7 +28,7 @@ procedure Safe_Read (Fd : int; Buf : out Init_String; Has_Read : out ssize_t)
             and then
           Same_Keys (Contents, Contents'Old)
             and then
-          Is_Append (Get (Contents'Old, Fd), One_String (Buf),
+          Is_Append (Get (Contents'Old, Fd), Buf,
                      Get (Contents, Fd), Has_Read)
             and then
           Elements_Equal_Except (Contents, Contents'Old, Fd),

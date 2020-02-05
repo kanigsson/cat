@@ -30,7 +30,7 @@ with
            and then
          Same_Keys (Contents, Contents'Old)
            and then
-       Is_Append (Get (Contents'Old, Fd), One_String (Buf),
+       Is_Append (Get (Contents'Old, Fd), Buf,
                   Get (Contents, Fd),
                   ssize_t (Num_Bytes))
            and then
