@@ -3,7 +3,6 @@ with Const_H;             use Const_H;
 with Contents_Table_Type; use Contents_Table_Type;
 with Interfaces.C;        use Interfaces.C;
 with Iostr;               use Iostr;
-with Lemmas;              use Lemmas;
 with Stdio;               use Stdio;
 with Ada.Command_Line;
 with Errors;
@@ -11,19 +10,17 @@ with Full_Write;
 with Perror;
 with Safe_Read;
 
-use Contents_Table_Type.Formal_Maps;
-use Contents_Table_Type. Formal_Maps.Formal_Model;
-use Iostr.Ghost_Package;
+use Contents_Table_Type.Maps;
 
 procedure Cat with
   SPARK_Mode => On,
   Pre        =>
-    (Contains (Contents, Stdin)
-       and then Contains (Contents, Stdout)
-       and then Contains (Contents, Stderr)
-       and then Length (Element (Contents, Stdin)) = 0
-       and then Length (Element (Contents, Stdout)) = 0
-       and then Length (Element (Contents, Stderr)) = 0)
+    (Has_Key (Contents, Stdin)
+       and then Has_Key (Contents, Stdout)
+       and then Has_Key (Contents, Stderr)
+       and then One_String'(Get (Contents, Stdin))'Length = 0
+       and then One_String'(Get (Contents, Stdout))'Length = 0
+       and then One_String'(Get (Contents, Stderr))'Length = 0)
 is
    X : int;
    Err : int;
@@ -38,117 +35,95 @@ is
      Global => (Proof_In => (FD_Table),
                 In_Out   => (Contents, Errors.Error_State)),
      Pre    =>
-       Contains (Contents, Stdout)
-         and then Contains (Contents, Input)
+       Has_Key (Contents, Stdout)
+         and then Has_Key (Contents, Input)
          and then Input >= 0
          and then Input /= Stdout
-         and then Length (Element (Contents, Input)) = 0,
+         and then One_String'(Get (Contents, Input))'Length = 0,
      Post =>
-       M.Same_Keys (Model (Contents'Old), Model (Contents))
+       Same_Keys (Contents'Old, Contents)
          and then
-       M.Elements_Equal_Except (Model (Contents),
-                                Model (Contents'Old),
+       Elements_Equal_Except (Contents,
+                                Contents'Old,
                                 Input,
                                 Stdout)
          and then
       (if Err = 0
        then
-         Element (Contents, Stdout)
-         = Element (Contents'Old, Stdout)
-         & Element (Contents, Input));
+         Get (Contents, Stdout)
+         = Get (Contents'Old, Stdout)
+         & Get (Contents, Input));
 
    procedure Copy_To_Stdout (Input : int; Err : out int) is
-      Contents_Pcd_Entry : constant Map (OPEN_MAX - 1,
-                                         Default_Modulus (OPEN_MAX - 1)) :=
+      Contents_Pcd_Entry : constant Map :=
         Contents with Ghost;
-      Contents_Old : Map (OPEN_MAX - 1, Default_Modulus (OPEN_MAX - 1))  :=
-        Contents with Ghost;
-      Old_Stdout, Old_Input : Unbounded_String with Ghost;
+      Contents_Old : Map := Contents with Ghost;
       Buf : Init_String (1 .. 1024);
       Has_Read : ssize_t;
    begin
-      pragma Assert (M.Elements_Equal_Except
-                      (Model (Contents),
-                       Model (Contents_Pcd_Entry),
+      pragma Assert (Elements_Equal_Except
+                      (Contents,
+                       Contents_Pcd_Entry,
                        Input,
                        Stdout));
-      pragma Assert (Element (Contents_Old, Stdout)
-                     = Element (Contents_Pcd_Entry, Stdout)
-                     & Element (Contents_Old, Input));
+      pragma Assert (Get (Contents_Old, Stdout)
+                     = Get (Contents_Pcd_Entry, Stdout)
+                     & Get (Contents_Old, Input));
       loop
          Contents_Old := Contents;
-            pragma Assert (Element (Contents_Old, Stdout)
-                           = Element (Contents_Pcd_Entry, Stdout)
-                           & Element (Contents_Old, Input));
+            pragma Assert (Get (Contents_Old, Stdout)
+                           = Get (Contents_Pcd_Entry, Stdout)
+                           & Get (Contents_Old, Input));
 
          Safe_Read (Input, Buf, Has_Read);
-         pragma Assert (Element (Contents, Stdout)
-                        = Element (Contents_Old, Stdout));
-         pragma Assert (M.Elements_Equal_Except
-                         (Model (Contents),
-                          Model (Contents_Pcd_Entry),
+         pragma Assert (Get (Contents, Stdout)
+                        = Get (Contents_Old, Stdout));
+         pragma Assert (Elements_Equal_Except
+                         (Contents,
+                          Contents_Pcd_Entry,
                           Input,
                           Stdout));
-         pragma Assert (M.Same_Keys (Model (Contents_Pcd_Entry),
-                                     Model (Contents)));
-         pragma Assert (Element (Contents, Input)
-                        = Append (Element (Contents_Old, Input),
-                                  Buf,
-                                  Has_Read));
+         pragma Assert (Same_Keys (Contents_Pcd_Entry,
+                                     Contents));
+         pragma Assert (Is_Append (Get (Contents_Old, Input), String (Buf),
+                        Get (Contents, Input), Has_Read));
          if Has_Read = 0 then
-            Equal_String (Element (Contents, Stdout),
-                          Element (Contents_Old, Stdout),
-                          Element (Contents_Pcd_Entry, Stdout),
-                          Element (Contents_Old, Input));
-            Equal_And_Append (Element (Contents, Stdout),
-                              Element (Contents_Pcd_Entry, Stdout),
-                              Element (Contents_Old, Input),
-                              Element (Contents, Input));
             exit;
          elsif Has_Read = -1 then
             Err := -1;
             return;
          end if;
 
-         Old_Stdout := Element (Contents, Stdout);
-         pragma Assert (size_t (Has_Read) <= Buf'Length);
-         Full_Write
-           (Stdout,
-            Buf,
-            size_t (Has_Read),
-            Err);
-         pragma Assert (M.Elements_Equal_Except
-                        (Model (Contents),
-                           Model (Contents_Pcd_Entry),
-                           Input,
-                           Stdout));
-         if Err = -1 then
-            return;
-         end if;
-         Equal_And_Append (Element (Contents, Stdout),
-                           Old_Stdout,
-                           Element (Contents_Old, Stdout),
-                           Buf,
-                           Has_Read);
-         Prove_Equality (Contents,
-                         Contents_Old,
-                         Contents_Pcd_Entry,
-                         Buf,
-                         Has_Read,
-                         Input,
-                         Stdout);
+         declare
+            Old_Stdout : One_String := Get (Contents, Stdout) with Ghost;
+         begin
+            pragma Assert (size_t (Has_Read) <= Buf'Length);
+            Full_Write
+              (Stdout,
+               Buf,
+               size_t (Has_Read),
+               Err);
+            pragma Assert (Elements_Equal_Except
+                           (Contents,
+                              Contents_Pcd_Entry,
+                              Input,
+                              Stdout));
+            if Err = -1 then
+               return;
+            end if;
 
-         pragma Loop_Invariant (M.Same_Keys
-                                  (Model (Contents_Pcd_Entry),
-                                   Model (Contents)));
-         pragma Loop_Invariant (M.Elements_Equal_Except
-                                  (Model (Contents),
-                                   Model (Contents_Pcd_Entry),
-                                   Stdout,
-                                   Input));
-         pragma Loop_Invariant (Element (Contents, Stdout)
-                                = Element (Contents_Pcd_Entry, Stdout)
-                                & Element (Contents, Input));
+            pragma Loop_Invariant (Same_Keys
+                                   (Contents_Pcd_Entry,
+                                      Contents));
+            pragma Loop_Invariant (Elements_Equal_Except
+                                   (Contents,
+                                      Contents_Pcd_Entry,
+                                      Stdout,
+                                      Input));
+            pragma Loop_Invariant (Get (Contents, Stdout)
+                                   = Get (Contents_Pcd_Entry, Stdout)
+                                   & Get (Contents, Input));
+         end;
       end loop;
 
       Err := 0;
@@ -190,10 +165,10 @@ begin
          end if;
 
          pragma Assert (X /= Stdout);
-         pragma Assert (Contains (Contents, Stdout));
-         pragma Loop_Invariant (Contains (Contents, Stdout));
-         pragma Loop_Invariant (Contains (Contents, Stdin));
-         pragma Loop_Invariant (Length (Element (Contents, Stdin)) = 0);
+         pragma Assert (Has_Key (Contents, Stdout));
+         pragma Loop_Invariant (Has_Key (Contents, Stdout));
+         pragma Loop_Invariant (Has_Key (Contents, Stdin));
+         pragma Loop_Invariant (One_String'(Get (Contents, Stdin))'Length = 0);
       end loop;
    end if;
 end Cat;

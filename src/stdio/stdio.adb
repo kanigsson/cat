@@ -24,7 +24,7 @@ is
    begin
       Fd := C_Open (File, Flags);
       if Fd >= 0 then
-         Insert (Contents, Fd, Null_Unbounded_String);
+         Contents := Add (Contents, Fd, "");
       end if;
    end Open;
 
@@ -32,7 +32,7 @@ is
    begin
       Result := C_Close (Fd);
       if Result = 0 then
-         Delete (Contents, Fd);
+         Contents := Remove (Contents, Fd);
       end if;
    end Close;
 
@@ -40,9 +40,9 @@ is
    begin
       Has_Read := C_Read (Fd, Buf'Address, Buf'Length, 0);
       if Has_Read > 0 then
-         Replace (Contents,
-                  Fd,
-                  Append (Element (Contents, Fd), Buf, Has_Read));
+         Contents := Add (Contents, Fd,
+                          Append (Get (Contents, Fd), One_String (Buf),
+                                  Has_Read));
       end if;
    end Read;
 
@@ -54,22 +54,22 @@ is
    begin
       Has_Written := C_Write (Fd, Buf'Address, Num_Bytes);
       if Has_Written > 0 then
-         Replace (Contents,
-                  Fd,
-                  Append (Element (Contents, Fd), Buf, Has_Written));
+         Contents :=
+           Add (Contents, Fd,
+                Append (Get (Contents, Fd), One_String (Buf), Has_Written));
       end if;
    end Write;
 
    procedure Reset (Fd : int) is
    begin
-      if Contains (Contents, Fd) then
-         Replace (Contents, Fd, Null_Unbounded_String);
+      if Has_Key (Contents, Fd) then
+         Contents := Add (Contents, Fd, "");
          null;
       end if;
    end Reset;
 
 begin
-   Insert (Contents, Stdin,  Null_Unbounded_String);
-   Insert (Contents, Stdout, Null_Unbounded_String);
-   Insert (Contents, Stderr, Null_Unbounded_String);
+   Contents := Add (Contents, Stdin,  "");
+   Contents := Add (Contents, Stdout, "");
+   Contents := Add (Contents, Stderr, "");
 end Stdio;

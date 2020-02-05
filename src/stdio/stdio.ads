@@ -3,6 +3,7 @@ with Contents_Table_Type; use Contents_Table_Type;
 with Interfaces.C;        use Interfaces.C;
 with Iostr;               use Iostr;
 with Errors;
+use Contents_Table_Type.Maps;
 
 package Stdio with
   SPARK_Mode        => On,
@@ -10,23 +11,19 @@ package Stdio with
   Initializes       => (FD_Table,
                         Contents),
   Initial_Condition =>
-    (Contains (Contents, Stdin)
-       and then Contains (Contents, Stdout)
-       and then Contains (Contents, Stderr)
-       and then Length (Element (Contents, Stdin)) = 0
-       and then Length (Element (Contents, Stdout)) = 0
-       and then Length (Element (Contents, Stderr)) = 0)
+    (Has_Key (Contents, Stdin)
+       and then Has_Key (Contents, Stdout)
+       and then Has_Key (Contents, Stderr)
+       and then One_String'(Get (Contents, Stdin))'Length = 0
+       and then One_String'(Get (Contents, Stdout))'Length = 0
+       and then One_String'(Get (Contents, Stderr))'Length = 0)
 is
 
    pragma Elaborate_Body;
 
-   use Iostr.Ghost_Package;
-   use Formal_Maps;
-   use Formal_Maps.Formal_Model;
-
    OPEN_MAX : constant Count_Type := 1024;
 
-   Contents : Map (OPEN_MAX - 1, Default_Modulus (OPEN_MAX - 1)) with Ghost;
+   Contents : Map with Ghost;
 
    subtype off_t is int;
 
@@ -38,16 +35,16 @@ is
           when 0 .. int (OPEN_MAX - 1) =>
             Length (Contents'Old) + 1 = Length (Contents)
               and then
-            Contains (Contents, Fd)
+            Has_Key (Contents, Fd)
               and then
-            Length (Element (Contents, Fd)) = 0
+            One_String'(Get (Contents, Fd))'Length = 0
               and then
-            not Contains (Contents'Old, Fd)
+            not Has_Key (Contents'Old, Fd)
               and then
-            Model (Contents'Old) <= Model (Contents)
+            Contents'Old <= Contents
               and then
-            M.Keys_Included_Except (Model (Contents),
-                                    Model (Contents'Old),
+            Keys_Included_Except (Contents,
+                                    Contents'Old,
                                     Fd),
           when others                  => False);
 
@@ -59,11 +56,11 @@ is
        when 0      =>
           Length (Contents) = Length (Contents'Old) - 1
             and then
-          not Contains (Contents, Fd)
+          not Has_Key (Contents, Fd)
             and then
-          Model (Contents) <= Model (Contents'Old)
+        Contents <= Contents'Old
             and then
-          M.Keys_Included_Except (Model (Contents'Old), Model (Contents), Fd),
+          Keys_Included_Except (Contents'Old, Contents, Fd),
        when others => False);
 
    procedure Read (Fd : int; Buf : out Init_String; Has_Read : out ssize_t)
@@ -75,23 +72,23 @@ is
         when -1                =>
           Contents = Contents'Old
             and then (if Errors.Get_Errno = Errors.ADA_EINTR
-                      then Contains (Contents, Fd)),
+                      then Has_Key (Contents, Fd)),
         when 0                 =>
           Contents = Contents'Old
-            and then Contains (Contents, Fd),
+            and then Has_Key (Contents, Fd),
         when 1 .. ssize_t'Last =>
           Natural (Has_Read) <= Buf'Length
             and then
           Buf (Buf'First .. Buf'First - 1 + Positive (Has_Read))'Valid_Scalars
             and then
-          Contains (Contents, Fd)
+          Has_Key (Contents, Fd)
             and then
-          M.Same_Keys (Model (Contents), Model (Contents'Old))
+          Same_Keys (Contents, Contents'Old)
             and then
-          Element (Contents, Fd)
-          = Append (Element (Contents'Old, Fd), Buf, Has_Read)
+        Is_Append (Get (Contents'Old, Fd), One_String (Buf),
+                   Get (Contents, Fd), Has_Read)
             and then
-          M.Elements_Equal_Except (Model (Contents), Model (Contents'Old), Fd),
+          Elements_Equal_Except (Contents, Contents'Old, Fd),
         when others          => False);
 
    procedure Write
@@ -112,22 +109,24 @@ is
           when -1                =>
             Contents = Contents'Old
               and then (if Errors.Get_Errno = Errors.ADA_EINTR
-                        then Contains (Contents, Fd)),
+                        then Has_Key (Contents, Fd)),
           when 0                 =>
             Contents = Contents'Old
-              and then Contains (Contents, Fd),
+              and then Has_Key (Contents, Fd),
           when 1 .. ssize_t'Last =>
             size_t (Has_Written) <= Num_Bytes
               and then
-            Contains (Contents, Fd)
+          Has_Key (Contents, Fd)
               and then
-            M.Same_Keys (Model (Contents), Model (Contents'Old))
+            Same_Keys (Contents, Contents'Old)
               and then
-            Element (Contents, Fd)
-            = Append (Element (Contents'Old, Fd), Buf, Has_Written)
+          Is_Append (Get (Contents'Old, Fd),
+                     One_String (Buf),
+                     Get (Contents, Fd),
+                       Has_Written)
               and then
-            M.Elements_Equal_Except (Model (Contents),
-                                     Model (Contents'Old),
+            Elements_Equal_Except (Contents,
+                                     Contents'Old,
                                      Fd),
           when others            => False);
 
@@ -135,14 +134,14 @@ is
      Ghost,
      Global => (In_Out => Contents),
      Post   =>
-       (if not Contains (Contents'Old, Fd)
+       (if not Has_Key (Contents'Old, Fd)
           then Contents'Old = Contents
         else
-          M.Same_Keys (Model (Contents), Model (Contents'Old))
+          Same_Keys (Contents, Contents'Old)
             and then
-          M.Elements_Equal_Except (Model (Contents), Model (Contents'Old), Fd)
+          Elements_Equal_Except (Contents, Contents'Old, Fd)
             and then
-          Length (Element (Contents, Fd)) = 0);
+          One_String'(Get (Contents, Fd))'Length = 0);
 
 
    Stdin  : constant int := 0;

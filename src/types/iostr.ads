@@ -13,98 +13,35 @@ is
 
    type Init_String is array (Positive range <>) of Init_Char;
 
-   package Ghost_Package with Ghost is
-      function To_String (Source : Init_String) return String with
-        Global => null,
-        Pre    => Source'Valid_Scalars,
-        Post   =>
-          To_String'Result'First = 1
-            and then To_String'Result'Last = Source'Length
-            and then
-         (for all J in 1 .. Source'Length =>
-            Source (Source'First - 1 + J) = To_String'Result (J));
+   subtype One_String is String
+   with Predicate => One_String'First = 1;
 
-      type Unbounded_String is private with
-        Default_Initial_Condition => Length (Unbounded_String) = 0;
+   function My_Eq (A, B : One_String) return Boolean is
+      (A'Last = B'Last and then
+         (for all I in A'Range => A (I) = B (I)));
 
-      function Null_Unbounded_String return Unbounded_String with
-        Global => null,
-        Post   => Length (Null_Unbounded_String'Result) = 0;
+   function Append (A, B : One_String) return One_String is
+     (if Integer'Last - B'Length < A'Length then A
+      else A & B);
 
-      function Length (Source : Unbounded_String) return Natural with
-        Global => null;
+   function Append (A, B : One_String; Bytes : int) return One_String is
+     (if Integer'Last - Integer (Bytes) < A'Length then A
+      else A & B (B'First .. Integer (Bytes)))
+   with Pre => 0 <= Bytes and then Bytes <= B'Length;
 
-      function To_String (Source : Unbounded_String) return String with
-        Global => null,
-        Post   =>
-          To_String'Result'First = 1
-            and then To_String'Result'Last = Length (Source);
+   function Is_Append (A, B, C : One_String) return Boolean is
+     (C'Length = (if Integer'Last - B'Length < A'Length then A'Length
+                  else A'Length + B'Length)
+      and then
+        (for all I in C'Range =>
+              C (I) = (if I <= A'Length then A (I) else B (I - A'Length))));
 
-      function "=" (L, R : Unbounded_String) return Boolean with
-        Global => null,
-        Post   => "="'Result = (To_String (L) = To_String (R));
+   function Is_Append (A, B, C : One_String; Bytes : int) return Boolean is
+     (C'Length = (if Integer'Last - Integer (Bytes) < A'Length then A'Length
+                  else A'Length + Bytes)
+      and then
+        (for all I in C'Range =>
+              C (I) = (if I <= A'Length then A (I) else B (I - A'Length))))
+   with Pre => 0 <= Bytes and then Bytes <= B'Length;
 
-      function "&" (L, R : Unbounded_String) return Unbounded_String with
-        Global         => null,
-        Contract_Cases =>
-          (Length (L) = Natural'Last    =>
-             To_String ("&"'Result) = To_String (L),
-           Length (L) < Natural'Last
-             and then
-           Length (R)
-           <= Natural'Last - Length (L) =>
-             To_String ("&"'Result) = To_String (L) & To_String (R),
-           others                       =>
-             To_String ("&"'Result) = To_String (L)
-                                      & To_String (R)
-                                          (1 .. Natural'Last - Length (L)));
-      function Append
-        (L  : Unbounded_String;
-         R : Init_String;
-         Bytes : int)
-      return     Unbounded_String
-        with
-          Global       => null,
-          Pre          =>
-            (if Bytes >= 0
-            then
-              Natural (Bytes) <= R'Length
-                and then
-              R (R'First .. R'First - 1 + Natural (Bytes))'Valid_Scalars),
-        Contract_Cases =>
-          (Bytes <= 0
-             or else
-           Length (L) = Natural'Last    => To_String (Append'Result)
-                                           = To_String (L),
-           Bytes > 0
-             and then
-           Natural (Bytes)
-           <= Natural'Last - Length (L) => To_String (Append'Result)
-                                           = To_String (L)
-                                           & To_String
-                                               (R (R'First
-                                                     ..
-                                                   R'First - 1
-                                                   + Natural (Bytes))),
-           others                       => To_String (Append'Result)
-                                           = To_String (L)
-                                           & To_String
-                                               (R (R'First
-                                                     ..
-                                                   Natural'Last - Length (L)
-                                                   - 1 + R'First)));
-
-   private
-
-      pragma SPARK_Mode (Off);
-      package ASU renames Ada.Strings.Unbounded;
-
-      type Unbounded_String is record
-        Str : ASU.Unbounded_String;
-      end record;
-
-      function Null_Unbounded_String return Unbounded_String is
-        (Unbounded_String'(Str => ASU.Null_Unbounded_String));
-
-   end Ghost_Package;
 end Iostr;

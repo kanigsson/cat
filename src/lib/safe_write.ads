@@ -4,9 +4,7 @@ with Iostr;               use Iostr;
 with Stdio;               use Stdio;
 with Errors;
 
-use Iostr.Ghost_Package;
-use Contents_Table_Type.Formal_Maps;
-use Contents_Table_Type.Formal_Maps.Formal_Model;
+use Contents_Table_Type.Maps;
 
 procedure Safe_Write
   (Fd          : int;
@@ -29,16 +27,16 @@ with
            and then Errors.Get_Errno /= Errors.ADA_EINTR,
        when 0                 =>
          Contents = Contents'Old
-           and then Contains (Contents, Fd),
+           and then Has_Key (Contents, Fd),
        when 1 .. ssize_t'Last =>
          size_t (Has_Written) <= Num_Bytes
            and then
-         Contains (Contents, Fd)
+         Has_Key (Contents, Fd)
            and then
-         M.Same_Keys (Model (Contents), Model (Contents'Old))
+         Same_Keys (Contents, Contents'Old)
            and then
-         Element (Contents, Fd)
-         = Append (Element (Contents'Old, Fd), Buf, Has_Written)
+       Is_Append (Get (Contents'Old, Fd), One_String (Buf), Get (Contents, Fd),
+                  Has_Written)
            and then
-         M.Elements_Equal_Except (Model (Contents), Model (Contents'Old), Fd),
+         Elements_Equal_Except (Contents, Contents'Old, Fd),
        when others            => False);

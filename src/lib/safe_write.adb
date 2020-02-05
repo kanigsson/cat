@@ -1,5 +1,4 @@
 with Ada.Containers; use Ada.Containers;
-with Lemmas;         use Lemmas;
 
 procedure Safe_Write
   (Fd          : int;
@@ -9,20 +8,10 @@ procedure Safe_Write
 with
   SPARK_Mode
 is
-   Contents_Pcd_Entry : constant Map (OPEN_MAX - 1,
-                                      Default_Modulus (OPEN_MAX - 1)) :=
-     Contents with Ghost;
-   Fd_Content_Old : Unbounded_String :=
-     (if Contains (Contents, Fd)
-      then Element (Contents, Fd)
-      else Null_Unbounded_String) with Ghost;
+   Contents_Pcd_Entry : constant Map := Contents with Ghost;
 begin
    loop
       pragma Loop_Invariant (Contents = Contents_Pcd_Entry);
-      Fd_Content_Old :=
-        (if Contains (Contents, Fd)
-         then Element (Contents, Fd)
-         else Null_Unbounded_String);
 
       Write (Fd, Buf, Num_Bytes, Has_Written);
 
@@ -32,15 +21,9 @@ begin
            (Buf (Buf'First
                   ..
                  Buf'First - 1 + Natural (Has_Written))'Valid_Scalars);
-         pragma Assert (M.Elements_Equal_Except (Model (Contents),
-                                                 Model (Contents_Pcd_Entry),
-                                                 Fd));
-         Equal_And_Append
-            (Element (Contents, Fd),
-             Fd_Content_Old,
-             Element (Contents_Pcd_Entry, Fd),
-             Buf,
-             Has_Written);
+         pragma Assert (Elements_Equal_Except (Contents,
+                                               Contents_Pcd_Entry,
+                                               Fd));
       end if;
 
       exit when (Has_Written < 0 and then Errors.Get_Errno /= Errors.ADA_EINTR)
