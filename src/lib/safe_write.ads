@@ -19,7 +19,7 @@ with
          and then Integer (Num_Bytes) <= Buf'Length
          and then Num_Bytes > 0
          and then
-       Buf (Buf'First .. Buf'First - 1 + Natural (Num_Bytes))'Valid_Scalars),
+       Buf (Buf'First .. Buf'First - 1 + Natural (Num_Bytes))'Initialized),
   Post =>
     (case Has_Written is
        when -1                =>
@@ -33,10 +33,10 @@ with
            and then
          Has_Key (Contents, Fd)
            and then
-         Same_Keys (Contents, Contents'Old)
+         Same_Keys (Contents'Old, Contents)
            and then
        Is_Append (Get (Contents'Old, Fd), Buf, Get (Contents, Fd),
                   Has_Written)
            and then
-         Elements_Equal_Except (Contents, Contents'Old, Fd),
+         Elements_Equal_Except (Contents'Old, Contents, Fd),
        when others            => False);

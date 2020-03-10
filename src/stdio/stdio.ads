@@ -79,7 +79,7 @@ is
         when 1 .. ssize_t'Last =>
           Natural (Has_Read) <= Buf'Length
             and then
-          Buf (Buf'First .. Buf'First - 1 + Positive (Has_Read))'Valid_Scalars
+          Buf (Buf'First .. Buf'First - 1 + Positive (Has_Read))'Initialized
             and then
           Has_Key (Contents, Fd)
             and then
@@ -103,7 +103,7 @@ is
           and then Integer (Num_Bytes) <= Buf'Length
           and then Num_Bytes > 0
           and then
-        Buf (Buf'First .. Buf'First - 1 + Natural (Num_Bytes))'Valid_Scalars),
+        Buf (Buf'First .. Buf'First - 1 + Natural (Num_Bytes))'Initialized),
      Post =>
        (case Has_Written is
           when -1                =>

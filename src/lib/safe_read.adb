@@ -15,9 +15,9 @@ begin
       Read (Fd, Buf, Has_Read);
 
       if Has_Read > 0 then
-         pragma Assert (Elements_Equal_Except (Contents,
-                                                 Contents_Pcd_Entry,
-                                                 Fd));
+         pragma Assert (Elements_Equal_Except (Contents_Pcd_Entry,
+                                               Contents,
+                                               Fd));
       end if;
 
       exit when (Has_Read < 0 and then Errors.Get_Errno /= Errors.ADA_EINTR)

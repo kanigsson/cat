@@ -14,22 +14,22 @@ procedure Safe_Read (Fd : int; Buf : out Init_String; Has_Read : out ssize_t)
      Post =>
      (case Has_Read is
         when -1                =>
-          Contents = Contents'Old
+          Contents'Old = Contents
             and then Errors.Get_Errno /= Errors.ADA_EINTR,
         when 0                 =>
-          Contents = Contents'Old
+          Contents'Old = Contents
             and then Has_Key (Contents, Fd),
         when 1 .. ssize_t'Last =>
           Natural (Has_Read) <= Buf'Length
             and then
-          Buf (Buf'First .. Buf'First - 1 + Positive (Has_Read))'Valid_Scalars
+          Buf (Buf'First .. Buf'First - 1 + Positive (Has_Read))'Initialized
             and then
           Has_Key (Contents, Fd)
             and then
-          Same_Keys (Contents, Contents'Old)
+          Same_Keys (Contents'Old, Contents)
             and then
           Is_Append (Get (Contents'Old, Fd), Buf,
                      Get (Contents, Fd), Has_Read)
             and then
-          Elements_Equal_Except (Contents, Contents'Old, Fd),
+          Elements_Equal_Except (Contents'Old, Contents, Fd),
         when others          => False);

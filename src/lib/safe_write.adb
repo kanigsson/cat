@@ -20,7 +20,7 @@ begin
          pragma Assert
            (Buf (Buf'First
                   ..
-                 Buf'First - 1 + Natural (Has_Written))'Valid_Scalars);
+                 Buf'First - 1 + Natural (Has_Written))'Initialized);
       end if;
 
       exit when (Has_Written < 0 and then Errors.Get_Errno /= Errors.ADA_EINTR)

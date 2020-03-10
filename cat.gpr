@@ -9,6 +9,7 @@ project Cat is
    for Ignore_Source_Sub_Dirs use ("src/types/templates");
    package Prove is
       for Proof_Dir use "proof";
+      for Proof_Switches ("Ada") use ("--no-axiom-guard");
    end Prove;
 
 

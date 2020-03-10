@@ -1,4 +1,5 @@
 with Ada.Containers; use Ada.Containers;
+with Lemmas;
 
 with Safe_Write;
 procedure Full_Write
@@ -12,6 +13,7 @@ is
    Has_Written : ssize_t := 0;
    Has_Written_B : ssize_t;
    Num_Bytes_S : ssize_t := ssize_t (Num_Bytes);
+   Has_Written_Old : ssize_t;
    Contents_Old : Map :=
      Contents with Ghost;
    Contents_Pcd_Entry : constant Map :=
@@ -19,9 +21,10 @@ is
 begin
    while Has_Written /= Num_Bytes_S loop
       Contents_Old := Contents;
+      Has_Written_Old := Has_Written;
       pragma Assert (Elements_Equal_Except
-                       (Contents,
-                        Contents_Pcd_Entry,
+                       (Contents_Pcd_Entry,
+                        Contents,
                         Fd));
 
       pragma Assert (Buf (Buf'First + Integer (Has_Written)
@@ -45,6 +48,11 @@ begin
              Num_Bytes - size_t (Has_Written),
              Has_Written_B);
 
+      pragma Assert (Elements_Equal_Except
+                              (Contents_Pcd_Entry,
+                               Contents,
+                               Fd));
+
       if Has_Written_B = -1 then
          Err := -1;
          return;
@@ -55,19 +63,22 @@ begin
 
       pragma Assert (Natural (Has_Written) <= Natural (Num_Bytes));
       pragma Assert
-        (Buf (Buf'First .. Buf'First - 1 + Natural (Num_Bytes))'Valid_Scalars);
+        (Buf (Buf'First .. Buf'First - 1 + Natural (Num_Bytes))'Initialized);
       pragma Assert
         (for all J in Buf'First .. Buf'First - 1 + Natural (Has_Written) =>
            (J in Buf'First .. Buf'First - 1 + Natural (Num_Bytes)
-              and then Buf (J)'Valid_Scalars));
+              and then Buf (J)'Initialized));
       pragma Assert
         (Buf (Buf'First
                ..
-              Buf'First - 1 + Natural (Has_Written))'Valid_Scalars);
+              Buf'First - 1 + Natural (Has_Written))'Initialized);
 
+      Lemmas.Lemma_Is_Append_Trans
+        (Get (Contents_Pcd_Entry, Fd), Get (Contents_Old, Fd),
+         Get (Contents, Fd), Buf, Has_Written_Old, Has_Written_B);
       pragma Loop_Invariant (Elements_Equal_Except
-                              (Contents,
-                               Contents_Pcd_Entry,
+                              (Contents_Pcd_Entry,
+                               Contents,
                                Fd));
 
       pragma Loop_Invariant (Has_Written in 0 .. Num_Bytes_S);
