@@ -15,3 +15,6 @@ const_h.ads: $(template_dir)/const_h.ads_templ
 
 proof:
 	gnatprove -P cat --no-counterexample --no-inlining -j 16 --replay
+mk_proofs:
+	gnatprove -P cat --clean
+	gnatprove -P cat --no-counterexample --no-inlining -j 16 --level=4

@@ -1,5 +1,8 @@
 #include <fcntl.h>
 with Interfaces.C; use Interfaces.C;
+
+--  This package contains the file control options.
+
 package Const_H is
    ADA_F_DUPFD : constant int := F_DUPFD;
    ADA_F_DUPFD_CLOEXEC : constant int := F_DUPFD_CLOEXEC;

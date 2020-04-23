@@ -3,6 +3,9 @@ with Interfaces.C;   use Interfaces.C;
 with Iostr;          use Iostr;
 with Ada.Containers.Functional_Maps;
 
+--  This package defines the type of variable Contents, that will store
+--  the content associated to each file descriptor.
+
 package Contents_Table_Type with
   Ghost,
   SPARK_Mode

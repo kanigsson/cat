@@ -54,7 +54,7 @@ package Lemmas with SPARK_Mode is
    --  is also true for C at Fd1, if B only differs from C at the different
    --  location Fd2.
    procedure Lemma_Is_Append_Equal_Except_Inv
-     (A, B, C: Map; Fd1, Fd2 : Int; I : Init_String; M : Int)
+     (A, B, C : Map; Fd1, Fd2 : int; I : Init_String; M : int)
    with Ghost,
    Pre =>
        Fd1 /= Fd2 and then
@@ -69,7 +69,7 @@ package Lemmas with SPARK_Mode is
 
    --  same as above, but for the left side of Is_Append
    procedure Lemma_Is_Append_Equal_Except_Inv2
-     (A, B, C: Map; Fd1, Fd2 : Int; I : Init_String; M : Int)
+     (A, B, C : Map; Fd1, Fd2 : int; I : Init_String; M : int)
    with Ghost,
    Pre =>
        Fd1 /= Fd2 and then
@@ -83,8 +83,8 @@ package Lemmas with SPARK_Mode is
      Is_Append (Get (A, Fd2), I, Get (C, Fd2), M);
 
 
-   -- If A differs from B in only one element X, and B from C in only one
-   -- element Y, then A differs from C only in X and Y.
+   --  If A differs from B in only one element X, and B from C in only one
+   --  element Y, then A differs from C only in X and Y.
    procedure Lemma_Equal_Except_Trans
       (A, B, C : Map; X, Y : int)
       with Ghost,

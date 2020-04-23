@@ -26,11 +26,16 @@ is
    X : int;
    Err : int;
 
+   --  Err_Message generates the argument of Perror when it is called.
+
    function Err_Message (Str : String) return String is
      (case Str'Length is
       when 0 .. Natural'Last - 5 => "cat: " & Str,
       when others                =>
         "cat: " & Str (Str'First .. Natural'Last - 6 + Str'First));
+
+   --  Copy_To_Stdout writes to Stdout what it reads in Input until
+   --  it reaches the end of file.
 
    procedure Copy_To_Stdout (Input : int; Err : out int) with
      Global => (Proof_In => (FD_Table),
@@ -48,30 +53,50 @@ is
                               Contents,
                               Input,
                               Stdout)
+       --  Contents is the same as before except for the content in
+       --  key Input and Stdout.
          and then
+         --  If no error occured, then what we read from Input has been
+         --  copied to Stdout.
       (if Err = 0
        then
            Is_Append (Get (Contents'Old, Stdout), Get (Contents, Input),
                       Get (Contents, Stdout)));
 
+   ----------------------
+   --  Copy_To_Stdout  --
+   ----------------------
+
    procedure Copy_To_Stdout (Input : int; Err : out int) is
       Contents_Pcd_Entry : constant Map :=
         Contents with Ghost;
-      Contents_Old : Map := Contents with Ghost;
-      Contents_Tmp : Map := Contents with Ghost;
+      --  Stores the value of Contents at the beginning of the procedure
+      Contents_Old : Map with Ghost;
+      --  Updated at the beginning of each iteration of the loop to store the
+      --  value of Contents at the end of last iteration.
+      Contents_Tmp : Map with Ghost;
+      --  Represents the intermediate map after read, but before write.
       Buf : Init_String (1 .. 1024);
+      --  Buffer
+
       Has_Read : ssize_t;
+      --  Parameter of Safe_Read
    begin
       loop
          Contents_Old := Contents;
          pragma Assert (Elements_Equal_Except (Contents_Pcd_Entry, Contents,
                         Input, Stdout));
+         --  Value of Contents at the beginning of the loop is stored in
+         --  Contents_Old.
 
          Safe_Read (Input, Buf, Has_Read);
+         --  Data is read from Input
+
          if Has_Read = 0 then
             Lemmas.Lemma_Equal_Except2_Id
               (Contents_Pcd_Entry, Contents_Old, Contents, Input, Stdout);
             exit;
+
          elsif Has_Read = -1 then
             Err := -1;
             pragma Assert (Contents_Old = Contents);
@@ -80,6 +105,8 @@ is
             pragma Assert (Elements_Equal_Except (Contents_Pcd_Entry, Contents,
                            Input, Stdout));
             return;
+            --  If Has_Read = 1, then an error occured
+
          end if;
 
          Contents_Tmp := Contents;
@@ -94,6 +121,8 @@ is
             pragma Assert (Elements_Equal_Except (Contents_Pcd_Entry, Contents,
                            Input, Stdout));
             return;
+            --  If Err = -1, then an error occured.
+
          end if;
 
          pragma Assert
@@ -112,12 +141,12 @@ is
          Lemmas.Lemma_Is_Append_Equal_Except_Inv2
            (Contents_Old, Contents_Tmp, Contents,
             Input, Stdout, Buf, Has_Read);
-         Lemmas.Lemma_Is_Append_Trans(Get (Contents_Pcd_Entry, Stdout),
-                                      Get (Contents_Old, Input),
-                                      Get (Contents, Input),
-                                      Get (Contents_Old, Stdout),
-                                      Get (Contents, Stdout),
-                                      Buf, Has_Read);
+         Lemmas.Lemma_Is_Append_Trans (Get (Contents_Pcd_Entry, Stdout),
+                                       Get (Contents_Old, Input),
+                                       Get (Contents, Input),
+                                       Get (Contents_Old, Stdout),
+                                       Get (Contents, Stdout),
+                                       Buf, Has_Read);
 
 
          pragma Loop_Invariant (Same_Keys
@@ -135,16 +164,23 @@ is
       pragma Assert (Elements_Equal_Except (Contents_Pcd_Entry, Contents,
                                             Input, Stdout));
       Err := 0;
+      --  If we exit the loop, everything went fine
+
    end Copy_To_Stdout;
 
 begin
    if Ada.Command_Line.Argument_Count = 0 then
       Copy_To_Stdout (Stdin, Err);
+      --  If no file is specified, we copy the content from Stdin
+
       if Err = -1 then
          Perror ("cat: ");
       end if;
    else
+
       for I in 1 .. Ada.Command_Line.Argument_Count loop
+      --  Else, we loop on the files called in argument
+
          if Ada.Command_Line.Argument (I) = "-" then
             X := Stdin;
          else
@@ -153,9 +189,11 @@ begin
                Perror (Err_Message (Ada.Command_Line.Argument (I)));
             end if;
          end if;
+         --  This block opens the file if necessary, and assigns X to the FD
 
          if X /= -1 then
             Copy_To_Stdout (X, Err);
+            --  Copying the content to Stdout
 
             if Err = -1 then
                Perror (Err_Message (Ada.Command_Line.Argument (I)));
@@ -171,6 +209,7 @@ begin
                Reset (Stdin);
                pragma Assert (One_String'(Get (Contents, Stdin))'Length = 0);
             end if;
+            --  This block closes the file or resets the content of Stdin.
          end if;
 
          pragma Assert (X /= Stdout);
@@ -178,6 +217,7 @@ begin
          pragma Loop_Invariant (Has_Key (Contents, Stdout));
          pragma Loop_Invariant (Has_Key (Contents, Stdin));
          pragma Loop_Invariant (One_String'(Get (Contents, Stdin))'Length = 0);
+         --  These loop invariants allow to prove Copy_To_Stdout preconditions.
       end loop;
    end if;
 end Cat;

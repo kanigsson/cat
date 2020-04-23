@@ -12,10 +12,10 @@ package body Lemmas with SPARK_Mode is
      (A, B, C : Map; X, Y : int) is null;
 
    procedure Lemma_Is_Append_Equal_Except_Inv
-     (A, B, C: Map; Fd1, Fd2 : Int; I : Init_String; M : Int) is null;
+     (A, B, C : Map; Fd1, Fd2 : int; I : Init_String; M : int) is null;
 
    procedure Lemma_Is_Append_Equal_Except_Inv2
-     (A, B, C: Map; Fd1, Fd2 : Int; I : Init_String; M : Int) is null;
+     (A, B, C : Map; Fd1, Fd2 : int; I : Init_String; M : int) is null;
 
    procedure Lemma_Equal_Except2_Trans
      (A, B, C : Map; X, Y : int) is null;
